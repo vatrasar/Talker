@@ -1,7 +1,10 @@
+import asyncio
+
 import flet as ft
 from typing import Dict, Callable, List
 
 from Core.Base.base_navigation import BaseFeatureNavigation
+from Features.Landing.landing_navigation import LandingNavigation
 
 class NavHost:
     """
@@ -19,7 +22,9 @@ class NavHost:
             page (ft.Page): The main application page instance.
         """
         self._page: ft.Page = page
-        self._feature_navigations: List[BaseFeatureNavigation] = []
+        self._feature_navigations: List[BaseFeatureNavigation] = [
+            LandingNavigation()
+        ]
         self._routes: Dict[str, Callable[[], ft.View]] = {}
         
         self._register_routes()
@@ -39,16 +44,15 @@ class NavHost:
         self._page.on_route_change = self._on_route_change
         self._page.on_view_pop = self._on_view_pop
 
-    def _on_route_change(self, e: ft.RouteChangeEvent) -> None:
+    def _on_route_change(self) -> None:
         """
         Handles the event triggered when the route changes.
 
         Finds the corresponding view builder function for the requested route
         and appends the new view to the page's views list. Handles fallback for unknown routes.
-
-        Args:
-            e (ft.RouteChangeEvent): The route change event containing the new route.
         """
+        self._page.views.clear()
+
         if self._page.route not in self._routes:
             fallback_view = ft.View(
                 self._page.route,
@@ -61,10 +65,10 @@ class NavHost:
         else:
             view_builder = self._routes[self._page.route]
             self._page.views.append(view_builder())
-            
+
         self._page.update()
 
-    def _on_view_pop(self, e: ft.ViewPopEvent) -> None:
+    async def _on_view_pop(self, e: ft.ViewPopEvent) -> None:
         """
         Handles the event when a view is popped (e.g., user presses the back button).
 
@@ -73,11 +77,16 @@ class NavHost:
         Args:
             e (ft.ViewPopEvent): The view pop event data.
         """
-        if len(self._page.views) > 1:
-            self._page.views.pop()
+        if e.view is not None:
+            self._page.views.remove(e.view)
             top_view = self._page.views[-1]
-            self._page.route = top_view.route
-            self._page.update()
+            await self._page.push_route(top_view.route)
+
+    def start(self) -> None:
+        """
+        Performs the initial navigation by directly invoking the route change handler.
+        """
+        self._on_route_change()
 
     def navigate_to(self, route: str) -> None:
         """
@@ -86,5 +95,4 @@ class NavHost:
         Args:
             route (str): The route path to navigate to.
         """
-        self._page.route = route
-        self._page.update()
+        asyncio.create_task(self._page.push_route(route))
