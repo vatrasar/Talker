@@ -37,14 +37,19 @@ class RecentProjectCard(ft.Container):
         self.border = ft.Border.all(1, ft.Colors.OUTLINE_VARIANT)
         self.on_click = self._handle_click
         self.on_hover = self._handle_hover
-        self.cursor = ft.MouseCursor.CLICK
+        
+        # Hover animations
+        self.animate = ft.Animation(200, ft.AnimationCurve.EASE_OUT)
+        self.scale = 1.0
         
         self.content = ft.Row(
             controls=[
                 ft.Container(
-                    content=ft.Icon(ft.Icons.FOLDER_OUTLINED, color=ft.Colors.ON_SURFACE_VARIANT, size=24),
-                    bgcolor=ft.Colors.SURFACE,
-                    padding=ft.Padding.all(12),
+                    content=ft.Icon(ft.Icons.FOLDER_OUTLINED, color=ft.Colors.PRIMARY, size=24),
+                    bgcolor=ft.Colors.SURFACE_CONTAINER_HIGH,
+                    width=48,
+                    height=48,
+                    alignment=ft.Alignment(0, 0),
                     border_radius=8,
                 ),
                 ft.Column(
@@ -73,7 +78,10 @@ class RecentProjectCard(ft.Container):
             self._on_click_callback()
 
     def _handle_hover(self, e: ft.ControlEvent) -> None:
-        self.bgcolor = ft.Colors.SURFACE_CONTAINER_HIGH if e.data == "true" else ft.Colors.SURFACE_CONTAINER
+        is_hovered = e.data
+        self.bgcolor = ft.Colors.SURFACE_CONTAINER_HIGH if is_hovered else ft.Colors.SURFACE_CONTAINER
+        self.border = ft.Border.all(1, ft.Colors.PRIMARY if is_hovered else ft.Colors.OUTLINE_VARIANT)
+        self.scale = 1.01 if is_hovered else 1.0
         self.update()
 
     def _handle_more_options(self, e: ft.ControlEvent) -> None:

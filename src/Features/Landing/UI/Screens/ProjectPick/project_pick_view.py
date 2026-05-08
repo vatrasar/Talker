@@ -16,7 +16,8 @@ class ProjectPickView(ft.View):
         super().__init__(route=route)
         
         self.bgcolor = ft.Colors.SURFACE
-        self.padding = ft.Padding.symmetric(horizontal=100, vertical=60)
+        self.padding = 0
+        self.scroll = ft.ScrollMode.AUTO
         
         self._build_ui()
 
@@ -82,21 +83,44 @@ class ProjectPickView(ft.View):
                     project_name="Product Launch Rev 2",
                     project_path="D:\\Work\\Talker\\Launch-Rev2",
                     updated_ago="Updated 1w ago"
+                ),
+                RecentProjectCard(
+                    project_name="Social Media Campaign",
+                    project_path="/Users/admin/Projects/Social-Media",
+                    updated_ago="Updated 2w ago"
+                ),
+                RecentProjectCard(
+                    project_name="Brand Identity Refresh",
+                    project_path="C:\\Designs\\Brand-Refresh",
+                    updated_ago="Updated 3w ago"
+                ),
+                RecentProjectCard(
+                    project_name="Market Analysis 2024",
+                    project_path="/Volumes/Data/Reports/Market-Analysis",
+                    updated_ago="Updated 1m ago"
+                ),
+                RecentProjectCard(
+                    project_name="Investor Pitch Deck",
+                    project_path="/Users/admin/Documents/Pitch-Deck",
+                    updated_ago="Updated 2m ago"
                 )
             ],
             spacing=16
         )
         
         self.controls.append(
-            ft.Column(
-                controls=[
-                    ft.Container(content=logo_row, margin=ft.Margin.only(bottom=80)),
-                    header_row,
-                    divider,
-                    projects_column
-                ],
-                alignment=ft.MainAxisAlignment.START,
-                horizontal_alignment=ft.CrossAxisAlignment.STRETCH
+            ft.Container(
+                content=ft.Column(
+                    controls=[
+                        ft.Container(content=logo_row, margin=ft.Margin.only(bottom=80)),
+                        header_row,
+                        divider,
+                        projects_column
+                    ],
+                    alignment=ft.MainAxisAlignment.START,
+                    horizontal_alignment=ft.CrossAxisAlignment.STRETCH
+                ),
+                padding=ft.Padding.symmetric(horizontal=200, vertical=60)
             )
         )
 
