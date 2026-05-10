@@ -21,7 +21,11 @@ def ProjectPickView():
     def handle_resize(e: ft.ControlEvent) -> None:
         set_is_xs(page.width < 576)
 
-    ft.use_effect(lambda: setattr(page, "on_resize", handle_resize), [])
+    def register_resize():
+        page.on_resize = handle_resize
+        return lambda: setattr(page, "on_resize", None)
+
+    ft.use_effect(register_resize, [])
 
     def handle_new_project(e: ft.ControlEvent) -> None:
         pass
