@@ -7,6 +7,7 @@ def RecentProjectCard(
     project_name: str,
     project_path: str,
     updated_ago: str,
+    show_details: bool = True,
     on_click: Callable[[], None] | None = None,
 ):
     """
@@ -56,13 +57,29 @@ def RecentProjectCard(
                 ),
                 ft.Column(
                     controls=[
-                        ft.Text(project_name, weight=ft.FontWeight.BOLD, size=16, color=ft.Colors.ON_SURFACE),
-                        ft.Text(project_path, size=12, color=ft.Colors.ON_SURFACE_VARIANT),
+                        ft.Text(
+                            project_name,
+                            weight=ft.FontWeight.BOLD,
+                            size=16,
+                            color=ft.Colors.ON_SURFACE,
+                        ),
+                        ft.Text(
+                            project_path,
+                            size=12,
+                            color=ft.Colors.ON_SURFACE_VARIANT,
+                            overflow=ft.TextOverflow.ELLIPSIS,
+                            max_lines=1,
+                        ),
                     ],
                     expand=True,
                     spacing=4,
                 ),
-                ft.Text(updated_ago, size=12, color=ft.Colors.ON_SURFACE_VARIANT),
+                ft.Text(
+                    updated_ago,
+                    size=12,
+                    color=ft.Colors.ON_SURFACE_VARIANT,
+                    visible=show_details,
+                ),
                 ft.IconButton(
                     icon=ft.Icons.MORE_HORIZ,
                     icon_color=ft.Colors.ON_SURFACE_VARIANT,
