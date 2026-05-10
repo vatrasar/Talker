@@ -36,6 +36,50 @@ def RecentProjectCard(
     def handle_more_options(e: ft.ControlEvent) -> None:
         pass
 
+    # UI Elements extracted to variables for a flatter structure
+    icon = ft.Container(
+        content=ft.Icon(ft.Icons.FOLDER_OUTLINED, color=ft.Colors.PRIMARY, size=24),
+        bgcolor=ft.Colors.SURFACE_CONTAINER_HIGH,
+        width=48,
+        height=48,
+        alignment=ft.Alignment(0, 0),
+        border_radius=8,
+    )
+
+    info = ft.Column(
+        controls=[
+            ft.Text(
+                project_name,
+                weight=ft.FontWeight.BOLD,
+                size=16,
+                color=ft.Colors.ON_SURFACE,
+            ),
+            ft.Text(
+                project_path,
+                size=12,
+                color=ft.Colors.ON_SURFACE_VARIANT,
+                overflow=ft.TextOverflow.ELLIPSIS,
+                max_lines=1,
+            ),
+        ],
+        expand=True,
+        spacing=4,
+    )
+
+    updated_text = ft.Text(
+        updated_ago,
+        size=12,
+        color=ft.Colors.ON_SURFACE_VARIANT,
+        visible=show_details,
+    )
+
+    more_button = ft.IconButton(
+        icon=ft.Icons.MORE_HORIZ,
+        icon_color=ft.Colors.ON_SURFACE_VARIANT,
+        tooltip="More Options",
+        on_click=handle_more_options,
+    )
+
     return ft.Container(
         bgcolor=ft.Colors.SURFACE_CONTAINER_HIGH if is_hovered else ft.Colors.SURFACE_CONTAINER,
         border_radius=8,
@@ -46,47 +90,7 @@ def RecentProjectCard(
         animate=ft.Animation(200, ft.AnimationCurve.EASE_OUT),
         scale=1.01 if is_hovered else 1.0,
         content=ft.Row(
-            controls=[
-                ft.Container(
-                    content=ft.Icon(ft.Icons.FOLDER_OUTLINED, color=ft.Colors.PRIMARY, size=24),
-                    bgcolor=ft.Colors.SURFACE_CONTAINER_HIGH,
-                    width=48,
-                    height=48,
-                    alignment=ft.Alignment(0, 0),
-                    border_radius=8,
-                ),
-                ft.Column(
-                    controls=[
-                        ft.Text(
-                            project_name,
-                            weight=ft.FontWeight.BOLD,
-                            size=16,
-                            color=ft.Colors.ON_SURFACE,
-                        ),
-                        ft.Text(
-                            project_path,
-                            size=12,
-                            color=ft.Colors.ON_SURFACE_VARIANT,
-                            overflow=ft.TextOverflow.ELLIPSIS,
-                            max_lines=1,
-                        ),
-                    ],
-                    expand=True,
-                    spacing=4,
-                ),
-                ft.Text(
-                    updated_ago,
-                    size=12,
-                    color=ft.Colors.ON_SURFACE_VARIANT,
-                    visible=show_details,
-                ),
-                ft.IconButton(
-                    icon=ft.Icons.MORE_HORIZ,
-                    icon_color=ft.Colors.ON_SURFACE_VARIANT,
-                    tooltip="More Options",
-                    on_click=handle_more_options,
-                ),
-            ],
+            controls=[icon, info, updated_text, more_button],
             alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
             vertical_alignment=ft.CrossAxisAlignment.CENTER,
             spacing=20,
