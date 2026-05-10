@@ -129,18 +129,17 @@ def ProjectPickView():
     )
 
     return ft.Container(
-        content=ft.Column(
+        content=ft.ListView(
             controls=[
                 ft.Container(content=logo_row, margin=ft.Margin.only(bottom=80)),
                 header_row,
                 divider,
                 projects_column,
             ],
-            alignment=ft.MainAxisAlignment.START,
-            horizontal_alignment=ft.CrossAxisAlignment.STRETCH,
-            scroll=ft.ScrollMode.AUTO,
+            spacing=10,
+            padding=ft.Padding.only(left=10, right=32),
         ),
         bgcolor=ft.Colors.SURFACE,
-        padding=ft.Padding.symmetric(horizontal=200, vertical=60),
+        padding=ft.Padding.only(left=190, right=168, top=60, bottom=60),
         expand=True,
     )
