@@ -45,58 +45,64 @@ def ProjectPickView():
         wrap=True,
     )
 
+    welcome_messages = ft.Column(
+        controls=[
+            ft.Text(
+                "Welcome back.",
+                size=32,
+                weight=ft.FontWeight.BOLD,
+                color=ft.Colors.ON_SURFACE,
+                text_align=ft.TextAlign.CENTER if is_xs else ft.TextAlign.LEFT,
+            ),
+            ft.Text(
+                "Here are your recent workspaces.",
+                size=14,
+                color=ft.Colors.ON_SURFACE_VARIANT,
+                text_align=ft.TextAlign.CENTER if is_xs else ft.TextAlign.LEFT,
+            ),
+        ],
+        col={"xs": 12, "sm": 8, "md": 8},
+        spacing=4,
+        horizontal_alignment=ft.CrossAxisAlignment.CENTER if is_xs else ft.CrossAxisAlignment.START,
+    )
+
+    new_project_button = ft.OutlinedButton(
+        content=ft.Row(
+            controls=[
+                ft.Icon(
+                    ft.Icons.CREATE_NEW_FOLDER_OUTLINED,
+                    size=18,
+                    color=ft.Colors.PRIMARY,
+                ),
+                ft.Text(
+                    "Open New Project",
+                    size=14,
+                    color=ft.Colors.PRIMARY,
+                    weight=ft.FontWeight.W_500,
+                ),
+            ],
+            spacing=8,
+            tight=True,
+        ),
+        style=ft.ButtonStyle(
+            shape=ft.RoundedRectangleBorder(radius=4),
+            side=ft.BorderSide(1, ft.Colors.OUTLINE),
+            padding=ft.Padding.all(16),
+            bgcolor=ft.Colors.SURFACE_CONTAINER,
+        ),
+        on_click=handle_new_project,
+    )
+
+    new_project_action = ft.Container(
+        content=new_project_button,
+        col={"xs": 12, "sm": 4, "md": 4},
+        alignment=ft.Alignment.CENTER if is_xs else ft.Alignment.CENTER_RIGHT,
+    )
+
     header_row = ft.ResponsiveRow(
         controls=[
-            ft.Column(
-                controls=[
-                    ft.Text(
-                        "Welcome back.",
-                        size=32,
-                        weight=ft.FontWeight.BOLD,
-                        color=ft.Colors.ON_SURFACE,
-                        text_align=ft.TextAlign.CENTER if is_xs else ft.TextAlign.LEFT,
-                    ),
-                    ft.Text(
-                        "Here are your recent workspaces.",
-                        size=14,
-                        color=ft.Colors.ON_SURFACE_VARIANT,
-                        text_align=ft.TextAlign.CENTER if is_xs else ft.TextAlign.LEFT,
-                    ),
-                ],
-                col={"xs": 12, "sm": 8, "md": 8},
-                spacing=4,
-                horizontal_alignment=ft.CrossAxisAlignment.CENTER if is_xs else ft.CrossAxisAlignment.START,
-            ),
-            ft.Container(
-                content=ft.OutlinedButton(
-                    content=ft.Row(
-                        controls=[
-                            ft.Icon(
-                                ft.Icons.CREATE_NEW_FOLDER_OUTLINED,
-                                size=18,
-                                color=ft.Colors.PRIMARY,
-                            ),
-                            ft.Text(
-                                "Open New Project",
-                                size=14,
-                                color=ft.Colors.PRIMARY,
-                                weight=ft.FontWeight.W_500,
-                            ),
-                        ],
-                        spacing=8,
-                        tight=True,
-                    ),
-                    style=ft.ButtonStyle(
-                        shape=ft.RoundedRectangleBorder(radius=4),
-                        side=ft.BorderSide(1, ft.Colors.OUTLINE),
-                        padding=ft.Padding.all(16),
-                        bgcolor=ft.Colors.SURFACE_CONTAINER,
-                    ),
-                    on_click=handle_new_project,
-                ),
-                col={"xs": 12, "sm": 4, "md": 4},
-                alignment=ft.Alignment.CENTER if is_xs else ft.Alignment.CENTER_RIGHT,
-            ),
+            welcome_messages,
+            new_project_action,
         ],
         vertical_alignment=ft.CrossAxisAlignment.CENTER,
     )
@@ -157,27 +163,27 @@ def ProjectPickView():
         spacing=16,
     )
 
+    main_content_column = ft.Column(
+        col={"xs": 12, "sm": 10, "md": 10, "lg": 8, "xl": 8},
+        offset={"sm": 1, "md": 1, "lg": 2, "xl": 2},
+        controls=[
+            ft.Container(
+                content=logo_row,
+                margin=ft.Margin.only(bottom=80),
+                alignment=ft.Alignment.CENTER,
+            ),
+            header_row,
+            divider,
+            projects_column,
+        ],
+        spacing=10,
+    )
+
     return ft.Container(
         content=ft.ListView(
             controls=[
                 ft.ResponsiveRow(
-                    controls=[
-                        ft.Column(
-                            col={"xs": 12, "sm": 10, "md": 10, "lg": 8, "xl": 8},
-                            offset={"sm": 1, "md": 1, "lg": 2, "xl": 2},
-                            controls=[
-                                ft.Container(
-                                    content=logo_row,
-                                    margin=ft.Margin.only(bottom=80),
-                                    alignment=ft.Alignment.CENTER,
-                                ),
-                                header_row,
-                                divider,
-                                projects_column,
-                            ],
-                            spacing=10,
-                        )
-                    ],
+                    controls=[main_content_column],
                     alignment=ft.MainAxisAlignment.CENTER,
                 )
             ],
