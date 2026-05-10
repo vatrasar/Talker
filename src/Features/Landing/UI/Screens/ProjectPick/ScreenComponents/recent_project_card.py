@@ -1,5 +1,6 @@
 import flet as ft
 from typing import Callable
+from Features.Landing.UI.Screens.ProjectPick.ScreenStyles.project_pick_styles import ProjectPickStyles as Styles
 
 
 @ft.component
@@ -31,33 +32,63 @@ def RecentProjectCard(
             on_click()
 
     def handle_hover(e: ft.ControlEvent) -> None:
-        set_is_hovered(str(e.data).lower() == "true")
+        set_is_hovered(e.data)
 
     def handle_more_options(e: ft.ControlEvent) -> None:
         pass
 
-    # UI Elements extracted to variables for a flatter structure
-    icon = ft.Container(
+    return ft.Container(
+        key="recent_project_card_root",
+        bgcolor=ft.Colors.SURFACE_CONTAINER_HIGH if is_hovered else ft.Colors.SURFACE_CONTAINER,
+        border_radius=Styles.CARD_BORDER_RADIUS,
+        padding=ft.Padding.all(20),
+        border=ft.Border.all(1, ft.Colors.PRIMARY if is_hovered else ft.Colors.OUTLINE_VARIANT),
+        on_click=handle_click,
+        on_hover=handle_hover,
+        animate=Styles.CARD_ANIMATION,
+        scale=1.01 if is_hovered else 1.0,
+        content=ft.Row(
+            controls=[
+                ProjectIcon(),
+                ProjectInfo(name=project_name, path=project_path),
+                UpdatedTimestamp(text=updated_ago, visible=show_details),
+                MoreOptionsButton(on_click=handle_more_options),
+            ],
+            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+            vertical_alignment=ft.CrossAxisAlignment.CENTER,
+            spacing=20,
+        ),
+    )
+
+
+# --- Sub-components (Implementation Details) ---
+
+
+@ft.component
+def ProjectIcon():
+    """Displays the visual icon representing a project folder."""
+    return ft.Container(
         content=ft.Icon(ft.Icons.FOLDER_OUTLINED, color=ft.Colors.PRIMARY, size=24),
         bgcolor=ft.Colors.SURFACE_CONTAINER_HIGH,
         width=48,
         height=48,
-        alignment=ft.Alignment(0, 0),
-        border_radius=8,
+        alignment=ft.Alignment.CENTER,
+        border_radius=Styles.CARD_BORDER_RADIUS,
     )
 
-    info = ft.Column(
+
+@ft.component
+def ProjectInfo(name: str, path: str):
+    """Displays the project's name and its file path location."""
+    return ft.Column(
         controls=[
             ft.Text(
-                project_name,
-                weight=ft.FontWeight.BOLD,
-                size=16,
-                color=ft.Colors.ON_SURFACE,
+                name,
+                style=Styles.CARD_NAME_STYLE,
             ),
             ft.Text(
-                project_path,
-                size=12,
-                color=ft.Colors.ON_SURFACE_VARIANT,
+                path,
+                style=Styles.CARD_PATH_STYLE,
                 overflow=ft.TextOverflow.ELLIPSIS,
                 max_lines=1,
             ),
@@ -66,33 +97,24 @@ def RecentProjectCard(
         spacing=4,
     )
 
-    updated_text = ft.Text(
-        updated_ago,
-        size=12,
-        color=ft.Colors.ON_SURFACE_VARIANT,
-        visible=show_details,
+
+@ft.component
+def UpdatedTimestamp(text: str, visible: bool):
+    """Displays the time elapsed since the project was last modified."""
+    return ft.Text(
+        text,
+        style=Styles.CARD_TIMESTAMP_STYLE,
+        visible=visible,
     )
 
-    more_button = ft.IconButton(
+
+@ft.component
+def MoreOptionsButton(on_click: Callable[[ft.ControlEvent], None]):
+    """Icon button for accessing contextual actions for the project."""
+    return ft.IconButton(
+        key="recent_project_card_more_button",
         icon=ft.Icons.MORE_HORIZ,
         icon_color=ft.Colors.ON_SURFACE_VARIANT,
         tooltip="More Options",
-        on_click=handle_more_options,
-    )
-
-    return ft.Container(
-        bgcolor=ft.Colors.SURFACE_CONTAINER_HIGH if is_hovered else ft.Colors.SURFACE_CONTAINER,
-        border_radius=8,
-        padding=ft.Padding.all(20),
-        border=ft.Border.all(1, ft.Colors.PRIMARY if is_hovered else ft.Colors.OUTLINE_VARIANT),
-        on_click=handle_click,
-        on_hover=handle_hover,
-        animate=ft.Animation(200, ft.AnimationCurve.EASE_OUT),
-        scale=1.01 if is_hovered else 1.0,
-        content=ft.Row(
-            controls=[icon, info, updated_text, more_button],
-            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-            vertical_alignment=ft.CrossAxisAlignment.CENTER,
-            spacing=20,
-        ),
+        on_click=on_click,
     )

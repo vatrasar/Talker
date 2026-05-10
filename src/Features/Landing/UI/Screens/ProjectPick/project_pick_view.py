@@ -2,6 +2,7 @@ import flet as ft
 from typing import Callable
 
 from Features.Landing.UI.Screens.ProjectPick.ScreenComponents.recent_project_card import RecentProjectCard
+from Features.Landing.UI.Screens.ProjectPick.ScreenStyles.project_pick_styles import ProjectPickStyles as Styles
 
 
 @ft.component
@@ -11,7 +12,7 @@ def ProjectPickView():
 
     Purpose: Provides the user with options to open existing projects or create a new one.
     Available Functionalities: View recent projects list, navigate to new project creation.
-    Key UI Elements: Application logo, welcome header, "Open New Project" button, list of recent projects.
+    Key UI Elements: Application logo, welcome header with new project button, "Open New Project" button, list of recent projects.
     Navigate From: App Launch
     Navigate To: Feature-specific screens (e.g., Workspace) depending on the selected project.
     """
@@ -36,7 +37,7 @@ def ProjectPickView():
         offset={"sm": 1, "md": 1, "lg": 2, "xl": 2},
         controls=[
             LogoSection(),
-            WelcomeHeader(is_xs=is_xs, on_new_project=handle_new_project),
+            WelcomeHeaderWithNewProject(is_xs=is_xs, on_new_project=handle_new_project),
             ft.Divider(height=40, color=ft.Colors.OUTLINE_VARIANT),
             RecentProjectsList(is_xs=is_xs),
         ],
@@ -69,10 +70,7 @@ def LogoSection():
                 ft.Icon(ft.Icons.BAR_CHART, color=ft.Colors.PRIMARY, size=48),
                 ft.Text(
                     "Talker",
-                    size=40,
-                    weight=ft.FontWeight.W_900,
-                    color=ft.Colors.PRIMARY,
-                    style=ft.TextStyle(letter_spacing=-1),
+                    style=Styles.LOGO_TEXT_STYLE,
                 ),
             ],
             alignment=ft.MainAxisAlignment.CENTER,
@@ -84,21 +82,18 @@ def LogoSection():
 
 
 @ft.component
-def WelcomeHeader(is_xs: bool, on_new_project: Callable[[ft.ControlEvent], None]):
+def WelcomeHeaderWithNewProject(is_xs: bool, on_new_project: Callable[[ft.ControlEvent], None]):
     """Displays the welcome message and the 'Open New Project' action."""
     welcome_text = ft.Column(
         controls=[
             ft.Text(
                 "Welcome back.",
-                size=32,
-                weight=ft.FontWeight.BOLD,
-                color=ft.Colors.ON_SURFACE,
+                style=Styles.WELCOME_TITLE_STYLE,
                 text_align=ft.TextAlign.CENTER if is_xs else ft.TextAlign.LEFT,
             ),
             ft.Text(
                 "Here are your recent workspaces.",
-                size=14,
-                color=ft.Colors.ON_SURFACE_VARIANT,
+                style=Styles.WELCOME_SUBTITLE_STYLE,
                 text_align=ft.TextAlign.CENTER if is_xs else ft.TextAlign.LEFT,
             ),
         ],
@@ -117,12 +112,7 @@ def WelcomeHeader(is_xs: bool, on_new_project: Callable[[ft.ControlEvent], None]
                 spacing=8,
                 tight=True,
             ),
-            style=ft.ButtonStyle(
-                shape=ft.RoundedRectangleBorder(radius=4),
-                side=ft.BorderSide(1, ft.Colors.OUTLINE),
-                padding=ft.Padding.all(16),
-                bgcolor=ft.Colors.SURFACE_CONTAINER,
-            ),
+            style=Styles.NEW_PROJECT_BTN_STYLE,
             on_click=on_new_project,
         ),
         col={"xs": 12, "sm": 4, "md": 4},
