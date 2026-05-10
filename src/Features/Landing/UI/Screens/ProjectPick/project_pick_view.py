@@ -3,20 +3,25 @@ from typing import Callable
 
 from Features.Landing.UI.Screens.ProjectPick.ScreenComponents.recent_project_card import RecentProjectCard
 from Features.Landing.UI.Screens.ProjectPick.ScreenStyles.project_pick_styles import ProjectPickStyles as Styles
+from Features.Landing.UI.Screens.ProjectPick.project_pick_view_model import ProjectPickViewModel
+from Features.Landing.Domain.Models.project import Project
 
 
 @ft.component
-def ProjectPickView():
+def ProjectPickView() -> ft.Container:
     """
     The initial landing screen of the application.
 
     Purpose: Provides the user with options to open existing projects or create a new one.
     Available Functionalities: View recent projects list, navigate to new project creation.
     Key UI Elements: Application logo, welcome header with new project button, "Open New Project" button, list of recent projects.
-    Navigate From: App Launch
+    Bindings: Uses ProjectPickViewModel for state and actions.
+    Navigate From: App Launch.
     Navigate To: Feature-specific screens (e.g., Workspace) depending on the selected project.
+    Used In: landing_routes.py.
     """
     page: ft.Page = ft.context.page
+    vm = ft.use_memo(ProjectPickViewModel, [])
     is_xs, set_is_xs = ft.use_state(page.width < 576)
 
     def handle_resize(e: ft.ControlEvent) -> None:
@@ -28,18 +33,15 @@ def ProjectPickView():
 
     ft.use_effect(register_resize, [])
 
-    def handle_new_project(e: ft.ControlEvent) -> None:
-        pass
-
     # Main structure assembly
     main_column = ft.Column(
         col={"xs": 12, "sm": 10, "md": 10, "lg": 8, "xl": 8},
         offset={"sm": 1, "md": 1, "lg": 2, "xl": 2},
         controls=[
             LogoSection(),
-            WelcomeHeaderWithNewProject(is_xs=is_xs, on_new_project=handle_new_project),
+            WelcomeHeaderWithNewProject(is_xs=is_xs, on_new_project=vm.handle_new_project),
             ft.Divider(height=40, color=ft.Colors.OUTLINE_VARIANT),
-            RecentProjectsList(is_xs=is_xs),
+            RecentProjectsList(is_xs=is_xs, projects=vm.state.projects),
         ],
         spacing=10,
     )
@@ -62,8 +64,14 @@ def ProjectPickView():
 
 
 @ft.component
-def LogoSection():
-    """Displays the main application logo and name."""
+def LogoSection() -> ft.Container:
+    """
+    Displays the main application logo and name.
+
+    Purpose: Branding and identification.
+    Key UI Elements: Icon, Text.
+    Used In: ProjectPickView.
+    """
     return ft.Container(
         content=ft.Row(
             controls=[
@@ -82,8 +90,15 @@ def LogoSection():
 
 
 @ft.component
-def WelcomeHeaderWithNewProject(is_xs: bool, on_new_project: Callable[[ft.ControlEvent], None]):
-    """Displays the welcome message and the 'Open New Project' action."""
+def WelcomeHeaderWithNewProject(is_xs: bool, on_new_project: Callable[[ft.ControlEvent], None]) -> ft.ResponsiveRow:
+    """
+    Displays the welcome message and the 'Open New Project' action.
+
+    Purpose: Greets the user and provides a primary action for new projects.
+    Usage: WelcomeHeaderWithNewProject(is_xs=True, on_new_project=handle_click)
+    Key UI Elements: Welcome title, subtitle, OutlinedButton.
+    Used In: ProjectPickView.
+    """
     welcome_text = ft.Column(
         controls=[
             ft.Text(
@@ -126,28 +141,23 @@ def WelcomeHeaderWithNewProject(is_xs: bool, on_new_project: Callable[[ft.Contro
 
 
 @ft.component
-def RecentProjectsList(is_xs: bool):
-    """Displays a column of recent project cards."""
-    projects = [
-        ("AI Marketing Research", "/Users/admin/Documents/Talker/AI-Marketing-Research", "Updated 2h ago"),
-        ("Global Expansion Strategy", "C:\\Projects\\Global-Strategy", "Updated 1d ago"),
-        ("Q3 Financials", "/Volumes/Data/Finance/Q3-2024", "Updated 3d ago"),
-        ("Product Launch Rev 2", "D:\\Work\\Talker\\Launch-Rev2", "Updated 1w ago"),
-        ("Social Media Campaign", "/Users/admin/Projects/Social-Media", "Updated 2w ago"),
-        ("Brand Identity Refresh", "C:\\Designs\\Brand-Refresh", "Updated 3w ago"),
-        ("Market Analysis 2024", "/Volumes/Data/Reports/Market-Analysis", "Updated 1m ago"),
-        ("Investor Pitch Deck", "/Users/admin/Documents/Pitch-Deck", "Updated 2m ago"),
-    ]
+def RecentProjectsList(is_xs: bool, projects: list[Project]) -> ft.Column:
+    """
+    Displays a column of recent project cards.
 
+    Usage: Renders a list of projects from the state.
+    Key UI Elements: RecentProjectCard instances.
+    Used In: ProjectPickView.
+    """
     return ft.Column(
         controls=[
             RecentProjectCard(
-                project_name=name,
-                project_path=path,
-                updated_ago=ago,
+                project_name=project.name,
+                project_path=project.path,
+                updated_ago=project.updated_ago,
                 show_details=not is_xs,
             )
-            for name, path, ago in projects
+            for project in projects
         ],
         spacing=16,
     )

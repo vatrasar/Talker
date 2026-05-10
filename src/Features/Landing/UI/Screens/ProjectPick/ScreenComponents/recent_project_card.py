@@ -23,7 +23,7 @@ def RecentProjectCard(
             on_click=handle_project_click
         )
     Key UI Elements: Folder icon, project name text, project path text, last updated text, menu icon.
-    Used In: ProjectPickView
+    Used In: RecentProjectsList.
     """
     is_hovered, set_is_hovered = ft.use_state(False)
 
