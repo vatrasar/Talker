@@ -21,7 +21,8 @@ def ProjectPickView() -> ft.Container:
     Used In: landing_routes.py.
     """
     page: ft.Page = ft.context.page
-    vm = ft.use_memo(ProjectPickViewModel, [])
+    di = page.session.store.get("di_container")
+    vm: ProjectPickViewModel = ft.use_memo(di.build_project_pick_view_model, [])
     is_xs, set_is_xs = ft.use_state(page.width < 576)
 
     def handle_resize(e: ft.ControlEvent) -> None:

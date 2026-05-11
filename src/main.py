@@ -16,6 +16,10 @@ def main(page: ft.Page) -> None:
     page.theme = get_app_theme()
     page.theme_mode = ft.ThemeMode.DARK
 
+    # Initialize Dependency Injection container
+    from infrastructure.app_di_container import AppDIContainer
+    page.session.store.set("di_container", AppDIContainer())
+
     page.render(NavHost)
 
 
