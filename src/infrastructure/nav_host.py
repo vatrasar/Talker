@@ -1,6 +1,6 @@
 import flet as ft
 
-from Features.Landing.landing_routes import get_landing_routes
+from features.landing.landing_routes import get_landing_routes
 
 
 @ft.component

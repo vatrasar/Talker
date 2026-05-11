@@ -1,6 +1,6 @@
 import flet as ft
 from typing import Callable
-from Features.Landing.UI.Screens.ProjectPick.ScreenStyles.project_pick_styles import ProjectPickStyles as Styles
+from features.landing.ui.screens.project_pick.screen_styles.project_pick_styles import ProjectPickStyles as Styles
 
 
 @ft.component

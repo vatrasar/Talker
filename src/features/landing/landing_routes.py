@@ -1,6 +1,6 @@
 import flet as ft
 
-from Features.Landing.UI.Screens.ProjectPick.project_pick_view import ProjectPickView
+from features.landing.ui.screens.project_pick.project_pick_view import ProjectPickView
 
 PROJECT_PICK_ROUTE = "/"
 

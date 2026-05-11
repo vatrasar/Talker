@@ -1,6 +1,6 @@
 import flet as ft
-from Infrastructure.nav_host import NavHost
-from Shared.GlobalStyles.app_theme import get_app_theme
+from infrastructure.nav_host import NavHost
+from shared.global_styles.app_theme import get_app_theme
 
 
 def main(page: ft.Page) -> None:

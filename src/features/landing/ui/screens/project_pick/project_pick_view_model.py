@@ -1,6 +1,6 @@
 import flet as ft
-from Features.Landing.Domain.Models.project import Project
-from Features.Landing.UI.Screens.ProjectPick.project_pick_state import ProjectPickState
+from features.landing.domain.models.project import Project
+from features.landing.ui.screens.project_pick.project_pick_state import ProjectPickState
 
 
 class ProjectPickViewModel:

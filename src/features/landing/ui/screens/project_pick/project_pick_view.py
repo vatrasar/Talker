@@ -1,10 +1,10 @@
 import flet as ft
 from typing import Callable
 
-from Features.Landing.UI.Screens.ProjectPick.ScreenComponents.recent_project_card import RecentProjectCard
-from Features.Landing.UI.Screens.ProjectPick.ScreenStyles.project_pick_styles import ProjectPickStyles as Styles
-from Features.Landing.UI.Screens.ProjectPick.project_pick_view_model import ProjectPickViewModel
-from Features.Landing.Domain.Models.project import Project
+from features.landing.ui.screens.project_pick.screen_components.recent_project_card import RecentProjectCard
+from features.landing.ui.screens.project_pick.screen_styles.project_pick_styles import ProjectPickStyles as Styles
+from features.landing.ui.screens.project_pick.project_pick_view_model import ProjectPickViewModel
+from features.landing.domain.models.project import Project
 
 
 @ft.component
