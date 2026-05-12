@@ -24,6 +24,7 @@ def ProjectPickView() -> ft.Container:
     di = page.session.store.get("di_container")
     vm: ProjectPickViewModel = ft.use_memo(di.build_project_pick_view_model, [])
     is_xs, set_is_xs = ft.use_state(page.width < 576)
+    file_picker = ft.use_memo(ft.FilePicker, [])
 
     async def handle_new_project_click(e: ft.ControlEvent) -> None:
         path = await file_picker.get_directory_path()
@@ -35,14 +36,6 @@ def ProjectPickView() -> ft.Container:
 
     ft.use_effect(load_projects, [])
 
-    file_picker = ft.use_memo(lambda: ft.FilePicker(), [])
-
-    def setup_file_picker():
-        page.overlay.append(file_picker)
-        page.update()
-        return lambda: page.overlay.remove(file_picker)
-
-    ft.use_effect(setup_file_picker, [])
 
     def handle_resize(e: ft.ControlEvent) -> None:
         set_is_xs(page.width < 576)

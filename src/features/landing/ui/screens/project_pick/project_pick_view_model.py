@@ -26,9 +26,9 @@ class ProjectPickViewModel:
 
     async def handle_folder_selected(self, path: str) -> None:
         """
-        Handles the logic after a folder has been selected via FilePicker.
+        Handles the logic after a folder has been selected.
 
-        Invoked By: ProjectPickView (FilePicker on_result).
+        Invoked By: ProjectPickView.
         """
         name = os.path.basename(path.rstrip(os.sep)) or path
         await self._add_recent_project_use_case.execute(name, path)
