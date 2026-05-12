@@ -5,7 +5,9 @@ from typing import Generator
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 
+from core.config import DATABASE_URL
 from core.data.entities.entity_base import EntityBase
+
 
 class DBCore:
     """
@@ -17,7 +19,6 @@ class DBCore:
     """
 
     def __init__(self) -> None:
-        DATABASE_URL = "sqlite:///./talker.db"
         self.engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
         self.session_factory = sessionmaker(autocommit=False, autoflush=False, bind=self.engine)
     
