@@ -156,3 +156,4 @@ cython_debug/
 .agents/
 AGENTS.md
 GEMINI.md
+.opencode/
