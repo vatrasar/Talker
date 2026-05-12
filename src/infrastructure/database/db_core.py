@@ -6,7 +6,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 
 from core.config import DATABASE_URL
-from core.data.entities.entity_base import EntityBase
+from core.data.entities.entity_base import BaseEntity
 
 
 class DBCore:
@@ -28,7 +28,7 @@ class DBCore:
 
         Used In: AppDIContainer during application startup.
         """
-        EntityBase.metadata.create_all(bind=self.engine)
+        BaseEntity.metadata.create_all(bind=self.engine)
     
     @contextmanager
     def get_session(self) -> Generator[Session, None, None]:

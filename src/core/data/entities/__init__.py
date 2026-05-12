@@ -1,1 +1,1 @@
-from core.data.entities.recent_project import RecentProject
+from core.data.entities.recent_project import RecentProjectEntity

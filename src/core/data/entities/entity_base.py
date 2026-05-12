@@ -1,4 +1,4 @@
 from sqlalchemy.orm import DeclarativeBase
 
-class EntityBase(DeclarativeBase):
+class BaseEntity(DeclarativeBase):
     pass

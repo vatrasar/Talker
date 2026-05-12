@@ -1,14 +1,14 @@
 from datetime import datetime
 from sqlalchemy import String, DateTime
 from sqlalchemy.orm import Mapped, mapped_column
-from core.data.entities.entity_base import EntityBase
+from core.data.entities.entity_base import BaseEntity
 
 
-class RecentProject(EntityBase):
+class RecentProjectEntity(BaseEntity):
     """
     Database entity for storing recent projects information.
 
-    Used In: DBCore (indirectly via registry), RecentProjectRepository (future).
+    Used In: DBCore (indirectly via registry), RecentProjectRepository.
     """
 
     __tablename__ = "recent_projects"
