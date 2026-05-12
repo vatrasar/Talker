@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, UTC
 from sqlalchemy import String, DateTime
 from sqlalchemy.orm import Mapped, mapped_column
 from core.data.entities.entity_base import BaseEntity
@@ -18,6 +18,6 @@ class RecentProjectEntity(BaseEntity):
     path: Mapped[str] = mapped_column(String(1024), nullable=False)
     last_opened_at: Mapped[datetime] = mapped_column(
         DateTime, 
-        default=datetime.utcnow, 
-        onupdate=datetime.utcnow
+        default=lambda: datetime.now(UTC), 
+        onupdate=lambda: datetime.now(UTC)
     )

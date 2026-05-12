@@ -23,7 +23,7 @@ class RecentProjectRepository(IRecentProjectRepository):
         """
         self._db_core = db_core
 
-    def get_all(self) -> List[RecentProject]:
+    async def get_all(self) -> List[RecentProject]:
         """
         Retrieves all recent projects, ordered by last_opened_at descending.
 
@@ -32,9 +32,10 @@ class RecentProjectRepository(IRecentProjectRepository):
         Returns:
             List[RecentProject]: List of all recent projects.
         """
-        with self._db_core.get_session() as session:
+        async with self._db_core.get_async_session() as session:
             statement = select(RecentProjectEntity).order_by(RecentProjectEntity.last_opened_at.desc())
-            entities = session.scalars(statement).all()
+            result = await session.execute(statement)
+            entities = result.scalars().all()
             return [
                 RecentProject(
                     id=e.id,
@@ -44,7 +45,7 @@ class RecentProjectRepository(IRecentProjectRepository):
                 ) for e in entities
             ]
 
-    def add_project(self, name: str, path: str) -> RecentProject:
+    async def add_project(self, name: str, path: str) -> RecentProject:
         """
         Adds a new project or updates the last_opened_at of an existing one.
 
@@ -57,14 +58,15 @@ class RecentProjectRepository(IRecentProjectRepository):
         Returns:
             RecentProject: The added or updated project domain model.
         """
-        with self._db_core.get_session() as session:
+        async with self._db_core.get_async_session() as session:
             statement = select(RecentProjectEntity).where(RecentProjectEntity.path == path)
-            existing = session.scalars(statement).first()
+            result = await session.execute(statement)
+            existing = result.scalars().first()
 
             if existing:
                 existing.name = name
-                session.commit()
-                session.refresh(existing)
+                await session.commit()
+                await session.refresh(existing)
                 return RecentProject(
                     id=existing.id,
                     name=existing.name,
@@ -74,8 +76,8 @@ class RecentProjectRepository(IRecentProjectRepository):
 
             new_project = RecentProjectEntity(name=name, path=path)
             session.add(new_project)
-            session.commit()
-            session.refresh(new_project)
+            await session.commit()
+            await session.refresh(new_project)
             return RecentProject(
                 id=new_project.id,
                 name=new_project.name,
@@ -83,7 +85,7 @@ class RecentProjectRepository(IRecentProjectRepository):
                 last_opened_at=new_project.last_opened_at
             )
 
-    def delete_project(self, project_id: int) -> None:
+    async def delete_project(self, project_id: int) -> None:
         """
         Deletes a project by its ID.
 
@@ -92,7 +94,7 @@ class RecentProjectRepository(IRecentProjectRepository):
         Args:
             project_id: The unique identifier of the project to delete.
         """
-        with self._db_core.get_session() as session:
+        async with self._db_core.get_async_session() as session:
             statement = delete(RecentProjectEntity).where(RecentProjectEntity.id == project_id)
-            session.execute(statement)
-            session.commit()
+            await session.execute(statement)
+            await session.commit()

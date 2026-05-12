@@ -1,9 +1,8 @@
 import pkgutil
-from contextlib import contextmanager
-from typing import Generator
+from contextlib import asynccontextmanager
+from typing import AsyncGenerator
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 
 from core.config import DATABASE_URL
 from core.data.entities.entity_base import BaseEntity
@@ -13,30 +12,31 @@ class DBCore:
     """
     Core database configuration and session management.
 
-    Purpose: Manages SQLAlchemy engine, session factory, and provides
-    context-managed database sessions.
+    Purpose: Manages SQLAlchemy async engine, session factory, and provides
+    context-managed asynchronous database sessions.
     Used In: AppDIContainer, repositories, and services requiring database access.
     """
 
     def __init__(self) -> None:
-        self.engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
-        self.session_factory = sessionmaker(autocommit=False, autoflush=False, bind=self.engine)
+        self.engine = create_async_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+        self.session_factory = async_sessionmaker(autocommit=False, autoflush=False, bind=self.engine)
     
-    def init_db_schema(self) -> None:
+    async def init_db_schema(self) -> None:
         """
         Initializes the database schema by importing all entities and creating tables.
 
         Used In: AppDIContainer during application startup.
         """
-        BaseEntity.metadata.create_all(bind=self.engine)
+        async with self.engine.begin() as conn:
+            await conn.run_sync(BaseEntity.metadata.create_all)
     
-    @contextmanager
-    def get_session(self) -> Generator[Session, None, None]:
+    @asynccontextmanager
+    async def get_async_session(self) -> AsyncGenerator[AsyncSession, None]:
         """
-        Provides a transactional scope around a series of operations.
+        Provides an asynchronous transactional scope around a series of operations.
 
         Yields:
-            Session: A SQLAlchemy session instance.
+            AsyncSession: A SQLAlchemy async session instance.
         
         Used In: Repositories and use cases for database transactions.
         """
@@ -44,10 +44,10 @@ class DBCore:
         try:
             yield session
         except Exception as e:
-            session.rollback() 
+            await session.rollback() 
             raise e
         finally:
-            session.close()
+            await session.close()
 
     
 

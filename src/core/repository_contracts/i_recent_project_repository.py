@@ -12,7 +12,7 @@ class IRecentProjectRepository(ABC):
     """
 
     @abstractmethod
-    def get_all(self) -> List[RecentProject]:
+    async def get_all(self) -> List[RecentProject]:
         """
         Retrieves all recent projects.
 
@@ -22,7 +22,7 @@ class IRecentProjectRepository(ABC):
         pass
 
     @abstractmethod
-    def add_project(self, name: str, path: str) -> RecentProject:
+    async def add_project(self, name: str, path: str) -> RecentProject:
         """
         Adds or updates a recent project.
 
@@ -36,7 +36,7 @@ class IRecentProjectRepository(ABC):
         pass
 
     @abstractmethod
-    def delete_project(self, project_id: int) -> None:
+    async def delete_project(self, project_id: int) -> None:
         """
         Deletes a recent project by its ID.
 

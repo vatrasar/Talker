@@ -1,5 +1,5 @@
 import flet as ft
-from typing import Callable
+from typing import Any, Callable
 
 from features.landing.ui.screens.project_pick.screen_components.recent_project_card import RecentProjectCard
 from features.landing.ui.screens.project_pick.screen_styles.project_pick_styles import ProjectPickStyles as Styles
@@ -25,6 +25,25 @@ def ProjectPickView() -> ft.Container:
     vm: ProjectPickViewModel = ft.use_memo(di.build_project_pick_view_model, [])
     is_xs, set_is_xs = ft.use_state(page.width < 576)
 
+    async def handle_new_project_click(e: ft.ControlEvent) -> None:
+        path = await file_picker.get_directory_path()
+        if path:
+            await vm.handle_folder_selected(path)
+
+    async def load_projects() -> None:
+        await vm.load_recent_projects()
+
+    ft.use_effect(load_projects, [])
+
+    file_picker = ft.use_memo(lambda: ft.FilePicker(), [])
+
+    def setup_file_picker():
+        page.overlay.append(file_picker)
+        page.update()
+        return lambda: page.overlay.remove(file_picker)
+
+    ft.use_effect(setup_file_picker, [])
+
     def handle_resize(e: ft.ControlEvent) -> None:
         set_is_xs(page.width < 576)
 
@@ -40,7 +59,7 @@ def ProjectPickView() -> ft.Container:
         offset={"sm": 1, "md": 1, "lg": 2, "xl": 2},
         controls=[
             LogoSection(),
-            WelcomeHeaderWithNewProject(is_xs=is_xs, on_new_project=vm.handle_new_project),
+            WelcomeHeaderWithNewProject(is_xs=is_xs, on_new_project=handle_new_project_click),
             ft.Divider(height=40, color=ft.Colors.OUTLINE_VARIANT),
             RecentProjectsList(is_xs=is_xs, projects=vm.state.projects),
         ],
@@ -91,7 +110,7 @@ def LogoSection() -> ft.Container:
 
 
 @ft.component
-def WelcomeHeaderWithNewProject(is_xs: bool, on_new_project: Callable[[ft.ControlEvent], None]) -> ft.ResponsiveRow:
+def WelcomeHeaderWithNewProject(is_xs: bool, on_new_project: Callable[[ft.ControlEvent], Any]) -> ft.ResponsiveRow:
     """
     Displays the welcome message and the 'Open New Project' action.
 

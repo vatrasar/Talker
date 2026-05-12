@@ -3,7 +3,7 @@ from infrastructure.nav_host import NavHost
 from shared.global_styles.app_theme import get_app_theme
 
 
-def main(page: ft.Page) -> None:
+async def main(page: ft.Page) -> None:
     """
     Application entry point.
 
@@ -18,7 +18,9 @@ def main(page: ft.Page) -> None:
 
     # Initialize Dependency Injection container
     from infrastructure.app_di_container import AppDIContainer
-    page.session.store.set("di_container", AppDIContainer())
+    di = AppDIContainer()
+    await di.initialize()
+    page.session.store.set("di_container", di)
 
     page.render(NavHost)
 
