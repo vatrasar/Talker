@@ -1,4 +1,5 @@
 import asyncio
+import urllib.parse
 import flet as ft
 from typing import Any, Callable
 
@@ -204,7 +205,9 @@ def RecentProjectsList(is_xs: bool, projects: list[Project]) -> ft.Column:
                 project_path=project.path,
                 updated_ago=project.updated_ago,
                 show_details=not is_xs,
-                on_click=lambda: ft.context.page.navigate(PROMPT_CREATION_ROUTE),
+                on_click=lambda p=project: ft.context.page.navigate(
+                    f"/prompts/create/{urllib.parse.quote(p.name, safe='')}/{urllib.parse.quote(p.path, safe='')}"
+                ),
             )
             for project in projects
         ],

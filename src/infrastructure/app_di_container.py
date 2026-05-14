@@ -1,4 +1,5 @@
 from features.landing.ui.screens.project_pick.project_pick_view_model import ProjectPickViewModel
+from features.prompting.ui.screens.prompt_creation.prompt_creation_view_model import PromptCreationViewModel
 from core.repository_contracts.i_recent_project_repository import IRecentProjectRepository
 from infrastructure.database.db_core import DBCore
 from infrastructure.repositories.recent_project_repository import RecentProjectRepository
@@ -46,3 +47,12 @@ class AppDIContainer:
             add_recent_project_use_case=self._add_recent_project_use_case,
             recent_project_repository=self._recent_project_repository
         )
+
+    def build_prompt_creation_view_model(self) -> PromptCreationViewModel:
+        """
+        Builds and returns a new instance of PromptCreationViewModel.
+
+        Returns:
+            PromptCreationViewModel: The instantiated ViewModel.
+        """
+        return PromptCreationViewModel()
