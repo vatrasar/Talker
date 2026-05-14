@@ -1,6 +1,7 @@
 import flet as ft
 
 from features.landing.landing_routes import get_landing_routes
+from features.prompting.prompting_routes import get_prompting_routes
 
 
 @ft.component
@@ -14,6 +15,7 @@ def NavHost():
     return ft.Router(
         routes=[
             get_landing_routes(),
+            get_prompting_routes(),
         ],
         manage_views=False,
     )
