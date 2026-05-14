@@ -27,3 +27,8 @@ copyright = "Copyright (C) 2023-2026 by Flet"
 
 [tool.flet.app]
 path = "src"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"

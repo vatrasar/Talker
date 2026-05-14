@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, Optional
 from core.models.recent_project import RecentProject
 
 
@@ -42,5 +42,35 @@ class IRecentProjectRepository(ABC):
 
         Args:
             project_id: The unique identifier of the project.
+        """
+        pass
+
+    @abstractmethod
+    async def get_count(self) -> int:
+        """
+        Returns the total number of recent projects.
+
+        Returns:
+            int: The project count.
+        """
+        pass
+
+    @abstractmethod
+    async def get_oldest_project(self) -> Optional[RecentProject]:
+        """
+        Retrieves the project with the oldest last_opened_at timestamp.
+
+        Returns:
+            Optional[RecentProject]: The oldest project, or None if no projects exist.
+        """
+        pass
+
+    @abstractmethod
+    async def delete_oldest(self, count: int) -> None:
+        """
+        Deletes the N oldest projects from the repository.
+
+        Args:
+            count: The number of oldest projects to delete.
         """
         pass

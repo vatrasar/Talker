@@ -1,5 +1,5 @@
-from typing import List
-from sqlalchemy import select, delete
+from typing import List, Optional
+from sqlalchemy import select, delete, func
 from core.data.entities.recent_project import RecentProjectEntity
 from core.models.recent_project import RecentProject
 from core.repository_contracts.i_recent_project_repository import IRecentProjectRepository
@@ -96,5 +96,61 @@ class RecentProjectRepository(IRecentProjectRepository):
         """
         async with self._db_core.get_async_session() as session:
             statement = delete(RecentProjectEntity).where(RecentProjectEntity.id == project_id)
+            await session.execute(statement)
+            await session.commit()
+
+    async def get_count(self) -> int:
+        """
+        Returns the total number of recent projects.
+
+        Invoked By: None.
+
+        Returns:
+            int: The project count.
+        """
+        async with self._db_core.get_async_session() as session:
+            statement = select(func.count()).select_from(RecentProjectEntity)
+            result = await session.execute(statement)
+            return result.scalar_one()
+
+    async def get_oldest_project(self) -> Optional[RecentProject]:
+        """
+        Retrieves the project with the oldest last_opened_at timestamp.
+
+        Invoked By: None.
+
+        Returns:
+            Optional[RecentProject]: The oldest project, or None if no projects exist.
+        """
+        async with self._db_core.get_async_session() as session:
+            statement = select(RecentProjectEntity).order_by(RecentProjectEntity.last_opened_at.asc()).limit(1)
+            result = await session.execute(statement)
+            entity = result.scalars().first()
+            if not entity:
+                return None
+            return RecentProject(
+                id=entity.id,
+                name=entity.name,
+                path=entity.path,
+                last_opened_at=entity.last_opened_at
+            )
+
+    async def delete_oldest(self, count: int) -> None:
+        """
+        Deletes the N oldest projects from the database.
+
+        Invoked By: AddRecentProjectUseCase._enforce_project_limit.
+
+        Args:
+            count: The number of oldest projects to delete.
+        """
+        async with self._db_core.get_async_session() as session:
+            subquery = (
+                select(RecentProjectEntity.id)
+                .order_by(RecentProjectEntity.last_opened_at.asc())
+                .limit(count)
+                .scalar_subquery()
+            )
+            statement = delete(RecentProjectEntity).where(RecentProjectEntity.id.in_(subquery))
             await session.execute(statement)
             await session.commit()
