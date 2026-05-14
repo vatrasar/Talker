@@ -1,3 +1,4 @@
+import asyncio
 import flet as ft
 from typing import Any, Callable
 
@@ -23,18 +24,29 @@ def ProjectPickView() -> ft.Container:
     page: ft.Page = ft.context.page
     di = page.session.store.get("di_container")
     vm: ProjectPickViewModel = ft.use_memo(di.build_project_pick_view_model, [])
+    state, _ = ft.use_state(vm.state)
+    
     is_xs, set_is_xs = ft.use_state(page.width < 576)
     file_picker = ft.use_memo(ft.FilePicker, [])
+
+    def register_file_picker():
+        page.services.append(file_picker)
+        return lambda: page.services.remove(file_picker)
+
+    ft.use_effect(register_file_picker, [])
+
+    async def load_projects() -> None:
+        await vm.load_recent_projects()
+
+    def on_mount():
+        page.run_task(load_projects)
+
+    ft.use_effect(on_mount, [])
 
     async def handle_new_project_click(e: ft.ControlEvent) -> None:
         path = await file_picker.get_directory_path()
         if path:
             await vm.handle_folder_selected(path)
-
-    async def load_projects() -> None:
-        await vm.load_recent_projects()
-
-    ft.use_effect(load_projects, [])
 
 
     def handle_resize(e: ft.ControlEvent) -> None:
@@ -54,7 +66,7 @@ def ProjectPickView() -> ft.Container:
             LogoSection(),
             WelcomeHeaderWithNewProject(is_xs=is_xs, on_new_project=handle_new_project_click),
             ft.Divider(height=40, color=ft.Colors.OUTLINE_VARIANT),
-            RecentProjectsList(is_xs=is_xs, projects=vm.state.projects),
+            RecentProjectsList(is_xs=is_xs, projects=state.projects),
         ],
         spacing=10,
     )
@@ -162,6 +174,28 @@ def RecentProjectsList(is_xs: bool, projects: list[Project]) -> ft.Column:
     Key UI Elements: RecentProjectCard instances.
     Used In: ProjectPickView.
     """
+    if not projects:
+        return ft.Column(
+            controls=[
+                ft.Container(
+                    content=ft.Column(
+                        controls=[
+                            ft.Icon(ft.Icons.FOLDER_OPEN_OUTLINED, size=40, color=ft.Colors.OUTLINE),
+                            ft.Text(
+                                "No recent projects yet.\nOpen a folder to get started.",
+                                style=Styles.WELCOME_SUBTITLE_STYLE,
+                                text_align=ft.TextAlign.CENTER,
+                            ),
+                        ],
+                        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                        spacing=10,
+                    ),
+                    padding=ft.Padding.symmetric(vertical=40),
+                    alignment=ft.Alignment.CENTER,
+                )
+            ]
+        )
+
     return ft.Column(
         controls=[
             RecentProjectCard(

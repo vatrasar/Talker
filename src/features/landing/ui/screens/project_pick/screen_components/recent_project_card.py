@@ -38,7 +38,7 @@ def RecentProjectCard(
         pass
 
     return ft.Container(
-        key="recent_project_card_root",
+        key=f"recent_project_card_{project_path}",
         bgcolor=ft.Colors.SURFACE_CONTAINER_HIGH if is_hovered else ft.Colors.SURFACE_CONTAINER,
         border_radius=Styles.CARD_BORDER_RADIUS,
         padding=ft.Padding.all(20),
@@ -112,7 +112,6 @@ def UpdatedTimestamp(text: str, visible: bool):
 def MoreOptionsButton(on_click: Callable[[ft.ControlEvent], None]):
     """Icon button for accessing contextual actions for the project."""
     return ft.IconButton(
-        key="recent_project_card_more_button",
         icon=ft.Icons.MORE_HORIZ,
         icon_color=ft.Colors.ON_SURFACE_VARIANT,
         tooltip="More Options",
