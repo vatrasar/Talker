@@ -15,7 +15,8 @@ def FileBrowserSidebar() -> ft.Container:
             return ft.ExpansionTile(
                 leading=ft.Icon(
                     ft.Icons.FOLDER_OPEN if children else ft.Icons.FOLDER, 
-                    color=ft.Colors.PRIMARY
+                    color=ft.Colors.PRIMARY,
+                    size=20
                 ),
                 title=ft.Text(name, size=14),
                 affinity=ft.TileAffinity.LEADING,
@@ -23,6 +24,8 @@ def FileBrowserSidebar() -> ft.Container:
                 collapsed_text_color=ft.Colors.ON_SURFACE,
                 text_color=ft.Colors.PRIMARY,
                 controls=children,
+                controls_padding=ft.Padding(left=20),
+                dense=True,
             )
         return ft.ListTile(
             leading=ft.Icon(ft.Icons.INSERT_DRIVE_FILE_OUTLINED, size=20, color=ft.Colors.OUTLINE),
