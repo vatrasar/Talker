@@ -14,8 +14,8 @@ def NavHost():
     """
     return ft.Router(
         routes=[
-            get_landing_routes(),
-            get_prompting_routes(),
+            *get_landing_routes(),
+            *get_prompting_routes(),
         ],
         manage_views=False,
     )

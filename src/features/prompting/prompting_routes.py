@@ -1,17 +1,16 @@
 import flet as ft
+from features.prompting.ui.screens.prompt_creation.prompt_creation_view import PromptCreationView
 
 PROMPTS_ROUTE = "/prompts"
+PROMPT_CREATION_ROUTE = "/prompts/create"
 
 
-def get_prompting_routes() -> ft.Route:
+def get_prompting_routes() -> list[ft.Route]:
     """
     Returns the route tree for the Prompting feature.
 
     Used In: NavHost
     """
-    # Placeholder component as we are only creating the skeleton
-    @ft.component
-    def PromptingPlaceholder():
-        return ft.Text("Prompting Feature Skeleton")
-
-    return ft.Route(path=PROMPTS_ROUTE, component=PromptingPlaceholder)
+    return [
+        ft.Route(path=PROMPT_CREATION_ROUTE, component=PromptCreationView),
+    ]

@@ -6,6 +6,7 @@ from features.landing.ui.screens.project_pick.screen_components.recent_project_c
 from features.landing.ui.screens.project_pick.screen_styles.project_pick_styles import ProjectPickStyles as Styles
 from features.landing.ui.screens.project_pick.project_pick_view_model import ProjectPickViewModel
 from features.landing.domain.models.project import Project
+from features.prompting.prompting_routes import PROMPT_CREATION_ROUTE
 
 
 @ft.component
@@ -203,6 +204,7 @@ def RecentProjectsList(is_xs: bool, projects: list[Project]) -> ft.Column:
                 project_path=project.path,
                 updated_ago=project.updated_ago,
                 show_details=not is_xs,
+                on_click=lambda: ft.context.page.navigate(PROMPT_CREATION_ROUTE),
             )
             for project in projects
         ],
