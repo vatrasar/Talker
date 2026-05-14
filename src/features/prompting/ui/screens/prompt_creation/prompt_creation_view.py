@@ -1,6 +1,9 @@
 import flet as ft
 import urllib.parse
 from features.prompting.ui.screens.prompt_creation.prompt_creation_view_model import PromptCreationViewModel
+from features.prompting.ui.screens.prompt_creation.screen_components.file_browser_sidebar import FileBrowserSidebar
+from features.prompting.ui.screens.prompt_creation.screen_components.prompt_editor import PromptEditor
+from features.prompting.ui.screens.prompt_creation.screen_components.prompt_settings_sidebar import PromptSettingsSidebar
 
 @ft.component
 def PromptCreationView() -> ft.Container:
@@ -8,8 +11,8 @@ def PromptCreationView() -> ft.Container:
     Screen for creating new prompts.
 
     Purpose: Allows the user to define and configure new prompts for the prompting feature.
-    Available Functionalities: Displays open project information.
-    Key UI Elements: Project name and path display.
+    Available Functionalities: Folder navigation, text translation, and whisper settings.
+    Key UI Elements: Folder tree, dual text fields, action buttons, settings sidebar.
     Navigation:
         Navigate From: ProjectPickView (via project card click).
         Navigate To: None (currently).
@@ -18,7 +21,6 @@ def PromptCreationView() -> ft.Container:
     page: ft.Page = ft.context.page
     di = page.session.store.get("di_container")
     vm: PromptCreationViewModel = ft.use_memo(di.build_prompt_creation_view_model, [])
-    state, _ = ft.use_state(vm.state)
     
     params = ft.use_route_params()
     
@@ -30,16 +32,16 @@ def PromptCreationView() -> ft.Container:
     ft.use_effect(on_mount, [params])
 
     return ft.Container(
-        content=ft.Column(
+        content=ft.Row(
             controls=[
-                ft.Text("Prompt Creation Screen", size=30, weight=ft.FontWeight.BOLD),
-                ft.Text(f"Project Name: {state.project_name}", size=20),
-                ft.Text(f"Project Path: {state.project_path}", size=16, italic=True),
-                ft.ElevatedButton("Go Back", on_click=lambda _: ft.context.page.navigate("/")),
+                FileBrowserSidebar(),
+                PromptEditor(vm=vm),
+                PromptSettingsSidebar(),
             ],
-            alignment=ft.MainAxisAlignment.CENTER,
-            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+            expand=True,
+            spacing=0
         ),
-        alignment=ft.Alignment.CENTER,
+        padding=15,
         expand=True,
+        bgcolor=ft.Colors.SURFACE,
     )
