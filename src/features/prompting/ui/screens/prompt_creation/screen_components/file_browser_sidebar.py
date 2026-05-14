@@ -6,46 +6,23 @@ def FileBrowserSidebar() -> ft.Container:
     Sidebar component for browsing project files.
 
     Purpose: Displays a tree structure of the current project's files and folders.
-    Key UI Elements: Folder tree with expansion tiles.
+    Key UI Elements: Folder tree with manual expansion control.
     Used In: PromptCreationView.
     """
     
-    def folder_item(name: str, children: list = None):
-        if children:
-            return ft.ExpansionTile(
-                leading=ft.Icon(
-                    ft.Icons.FOLDER_OPEN if children else ft.Icons.FOLDER, 
-                    color=ft.Colors.PRIMARY,
-                    size=20
-                ),
-                title=ft.Text(name, size=14),
-                affinity=ft.TileAffinity.LEADING,
-                trailing=ft.Icon(ft.Icons.ADD_CIRCLE_OUTLINE, size=20, color=ft.Colors.PRIMARY_CONTAINER),
-                collapsed_text_color=ft.Colors.ON_SURFACE,
-                text_color=ft.Colors.PRIMARY,
-                controls=children,
-                controls_padding=ft.Padding(left=20),
-                dense=True,
-            )
-        return ft.ListTile(
-            leading=ft.Icon(ft.Icons.INSERT_DRIVE_FILE_OUTLINED, size=20, color=ft.Colors.OUTLINE),
-            title=ft.Text(name, size=14),
-            dense=True,
-        )
-
     hardcoded_tree = [
-        folder_item("src", children=[
-            folder_item("features", children=[
-                folder_item("prompting", children=[
-                    folder_item("ui", children=[
-                        folder_item("prompt_creation_view.py")
+        FileBrowserItem("src", children=[
+            FileBrowserItem("features", children=[
+                FileBrowserItem("prompting", children=[
+                    FileBrowserItem("ui", children=[
+                        FileBrowserItem("prompt_creation_view.py")
                     ])
                 ])
             ]),
-            folder_item("main.py")
+            FileBrowserItem("main.py")
         ]),
-        folder_item("requirements.txt"),
-        folder_item("README.md")
+        FileBrowserItem("requirements.txt"),
+        FileBrowserItem("README.md")
     ]
 
     return ft.Container(
@@ -69,4 +46,86 @@ def FileBrowserSidebar() -> ft.Container:
             ],
             expand=True
         )
+    )
+
+
+@ft.component
+def FileBrowserItem(name: str, children: list = None) -> ft.Column | ft.Container:
+    """
+    Represents an item (file or folder) in the file browser.
+    
+    Purpose: Handles display and expansion logic for files and folders.
+    """
+    is_expanded, set_is_expanded = ft.use_state(False)
+    is_hovered, set_is_hovered = ft.use_state(False)
+
+    def toggle_expand(e: ft.ControlEvent):
+        set_is_expanded(not is_expanded)
+
+    def on_hover(e: ft.ControlEvent):
+        set_is_hovered(e.data == "true")
+
+    # Build controls conditionally to keep the UI tree lean
+    row_controls = [
+        ft.Icon(
+            (ft.Icons.FOLDER_OPEN if is_expanded else ft.Icons.FOLDER) 
+            if children else ft.Icons.INSERT_DRIVE_FILE_OUTLINED,
+            color=ft.Colors.PRIMARY if children else ft.Colors.OUTLINE,
+            size=18
+        ),
+        ft.Text(
+            name, 
+            size=13, 
+            color=ft.Colors.PRIMARY if is_expanded else ft.Colors.ON_SURFACE,
+            weight=ft.FontWeight.W_500 if is_expanded else None,
+            expand=True,
+            no_wrap=True,
+            overflow=ft.TextOverflow.ELLIPSIS,
+        )
+    ]
+
+    if children:
+        row_controls.append(
+            ft.IconButton(
+                icon=ft.Icons.REMOVE_CIRCLE_OUTLINE if is_expanded else ft.Icons.ADD_CIRCLE_OUTLINE,
+                icon_size=16,
+                icon_color=ft.Colors.PRIMARY_CONTAINER,
+                on_click=toggle_expand,
+                width=24,
+                height=24,
+                style=ft.ButtonStyle(padding=ft.Padding.all(0)),
+            )
+        )
+
+    # Layout for the item row
+    item_row = ft.Container(
+        content=ft.Row(
+            controls=row_controls,
+            spacing=8,
+            vertical_alignment=ft.CrossAxisAlignment.CENTER,
+        ),
+        padding=ft.Padding.only(left=4, top=2, right=4, bottom=2),
+        border_radius=8,
+        bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST if is_hovered else None,
+        on_hover=on_hover,
+    )
+
+    if not children:
+        return item_row
+
+    return ft.Column(
+        controls=[
+            item_row,
+            ft.Container(
+                content=ft.Column(
+                    controls=children,
+                    spacing=0,
+                ),
+                padding=ft.Padding.only(left=10),
+                margin=ft.Margin.only(left=10),
+                border=ft.Border(left=ft.BorderSide(1, ft.Colors.OUTLINE_VARIANT)),
+                visible=is_expanded,
+            )
+        ],
+        spacing=0
     )
