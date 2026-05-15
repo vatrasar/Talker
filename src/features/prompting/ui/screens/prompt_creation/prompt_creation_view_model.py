@@ -85,5 +85,5 @@ class PromptCreationViewModel:
         )
 
     def _handle_scan_error(self, path: str, error: Exception) -> None:
-        # Logging the error to console as an explicit handling strategy for inaccessible folders
+
         print(f"Warning: Could not scan directory {path}: {error}")

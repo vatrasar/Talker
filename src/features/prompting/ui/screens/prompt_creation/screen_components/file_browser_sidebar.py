@@ -26,7 +26,7 @@ def FileBrowserSidebar(vm: PromptCreationViewModel) -> ft.Container:
     tree_controls = build_tree_controls(state.file_system_tree)
 
     return ft.Container(
-        width=280,
+        animate=ft.Animation(300, ft.AnimationCurve.EASE_OUT),
         bgcolor=ft.Colors.SURFACE_CONTAINER_LOW,
         border_radius=16,
         padding=15,
@@ -42,7 +42,8 @@ def FileBrowserSidebar(vm: PromptCreationViewModel) -> ft.Container:
                     scroll=ft.ScrollMode.AUTO,
                     expand=True,
                     spacing=0
-                )
+                ),
+                ft.Container(width=220, height=0)
             ],
             expand=True
         )
@@ -78,9 +79,7 @@ def FileBrowserItem(name: str, children: list = None) -> ft.Column | ft.Containe
             size=13, 
             color=ft.Colors.PRIMARY if is_expanded else ft.Colors.ON_SURFACE,
             weight=ft.FontWeight.W_500 if is_expanded else None,
-            expand=True,
             no_wrap=True,
-            overflow=ft.TextOverflow.ELLIPSIS,
         )
     ]
 
