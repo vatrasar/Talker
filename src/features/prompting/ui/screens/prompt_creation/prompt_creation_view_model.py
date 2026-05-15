@@ -31,31 +31,59 @@ class PromptCreationViewModel:
 
         Invoked By: set_project_info.
         """
-        if not self.state.project_path or not os.path.exists(self.state.project_path):
+        if self._is_invalid_path(self.state.project_path):
             return
 
-        def _scan_directory(path: str) -> list[FileSystemItem]:
-            items = []
-            try:
-                for entry in os.scandir(path):
-                    if entry.name.startswith("."):
-                        continue
-                        
-                    if entry.is_dir():
-                        items.append(FileSystemItem(
-                            name=entry.name,
-                            type=FileSystemItemType.FOLDER,
-                            children=_scan_directory(entry.path)
-                        ))
-                    else:
-                        items.append(FileSystemItem(
-                            name=entry.name,
-                            type=FileSystemItemType.FILE
-                        ))
-            except PermissionError:
-                pass
-            
-            items.sort(key=lambda x: (x.type != FileSystemItemType.FOLDER, x.name.lower()))
-            return items
+        self.state.file_system_tree = await asyncio.to_thread(
+            self._scan_directory, 
+            self.state.project_path
+        )
 
-        self.state.file_system_tree = await asyncio.to_thread(_scan_directory, self.state.project_path)
+    def _is_invalid_path(self, path: str | None) -> bool:
+        return not path or not os.path.exists(path)
+
+    def _scan_directory(self, path: str) -> list[FileSystemItem]:
+        items = []
+
+        try:
+            items = self._get_directory_items(path)
+        except PermissionError as e:
+            self._handle_scan_error(path, e)
+        
+        items.sort(key=lambda x: (x.type != FileSystemItemType.FOLDER, x.name.lower()))
+        return items
+
+    def _get_directory_items(self, path: str) -> list[FileSystemItem]:
+        items = []
+        
+        for entry in os.scandir(path):
+            self._process_directory_entry(entry, items)
+            
+        return items
+
+    def _process_directory_entry(self, entry: os.DirEntry, items: list[FileSystemItem]) -> None:
+        if entry.name.startswith("."):
+            return
+            
+        if entry.is_dir():
+            items.append(self._create_folder_item(entry))
+            return
+            
+        items.append(self._create_file_item(entry))
+
+    def _create_folder_item(self, entry: os.DirEntry) -> FileSystemItem:
+        return FileSystemItem(
+            name=entry.name,
+            type=FileSystemItemType.FOLDER,
+            children=self._scan_directory(entry.path)
+        )
+
+    def _create_file_item(self, entry: os.DirEntry) -> FileSystemItem:
+        return FileSystemItem(
+            name=entry.name,
+            type=FileSystemItemType.FILE
+        )
+
+    def _handle_scan_error(self, path: str, error: Exception) -> None:
+        # Logging the error to console as an explicit handling strategy for inaccessible folders
+        print(f"Warning: Could not scan directory {path}: {error}")
