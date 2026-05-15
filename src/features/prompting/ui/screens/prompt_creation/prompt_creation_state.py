@@ -13,3 +13,5 @@ class PromptCreationState:
     project_name: str = ""
     project_path: str = ""
     file_system_tree: list[FileSystemItem] = field(default_factory=list)
+    expanded_folders: set[str] = field(default_factory=set)
+    sidebar_width: float = 280.0

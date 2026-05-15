@@ -17,7 +17,8 @@ def FileBrowserSidebar(vm: PromptCreationViewModel) -> ft.Container:
     def build_tree_controls(items: list[FileSystemItem]) -> list[ft.Control]:
         return [
             FileBrowserItem(
-                name=item.name,
+                item=item,
+                vm=vm,
                 children=build_tree_controls(item.children) if item.type == FileSystemItemType.FOLDER else None
             )
             for item in items
@@ -27,6 +28,7 @@ def FileBrowserSidebar(vm: PromptCreationViewModel) -> ft.Container:
 
     return ft.Container(
         animate=ft.Animation(300, ft.AnimationCurve.EASE_OUT),
+        width=state.sidebar_width,
         bgcolor=ft.Colors.SURFACE_CONTAINER_LOW,
         border_radius=16,
         padding=15,
@@ -43,7 +45,6 @@ def FileBrowserSidebar(vm: PromptCreationViewModel) -> ft.Container:
                     expand=True,
                     spacing=0
                 ),
-                ft.Container(width=220, height=0)
             ],
             expand=True
         )
@@ -51,17 +52,18 @@ def FileBrowserSidebar(vm: PromptCreationViewModel) -> ft.Container:
 
 
 @ft.component
-def FileBrowserItem(name: str, children: list = None) -> ft.Column | ft.Container:
+def FileBrowserItem(item: FileSystemItem, vm: PromptCreationViewModel, children: list = None) -> ft.Column | ft.Container:
     """
     Represents an item (file or folder) in the file browser.
     
     Purpose: Handles display and expansion logic for files and folders with animated transitions.
     """
-    is_expanded, set_is_expanded = ft.use_state(False)
+    state, _ = ft.use_state(vm.state)
+    is_expanded = item.path in state.expanded_folders
     is_hovered, set_is_hovered = ft.use_state(False)
 
-    def toggle_expand(e: ft.ControlEvent):
-        set_is_expanded(not is_expanded)
+    async def toggle_expand(e: ft.ControlEvent):
+        await vm.toggle_folder(item.path)
 
     def on_hover(e: ft.ControlEvent):
         set_is_hovered(e.data == "true")
@@ -75,7 +77,7 @@ def FileBrowserItem(name: str, children: list = None) -> ft.Column | ft.Containe
             size=18
         ),
         ft.Text(
-            name, 
+            item.name, 
             size=13, 
             color=ft.Colors.PRIMARY if is_expanded else ft.Colors.ON_SURFACE,
             weight=ft.FontWeight.W_500 if is_expanded else None,

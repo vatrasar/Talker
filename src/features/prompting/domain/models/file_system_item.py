@@ -9,5 +9,6 @@ class FileSystemItem:
     Used In: PromptCreationState, PromptCreationViewModel, FileBrowserSidebar.
     """
     name: str
+    path: str
     type: FileSystemItemType
     children: list["FileSystemItem"] = field(default_factory=list)
