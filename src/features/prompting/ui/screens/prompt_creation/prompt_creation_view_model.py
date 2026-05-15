@@ -108,8 +108,19 @@ class PromptCreationViewModel:
         def process_items(items, level):
             nonlocal max_width
             for item in items:
-                # Calculation: level * indent + name_len * char_width + static_ui_parts
-                item_width = (level * 20) + (len(item.name) * 8.5) + 85
+                # Dokładne wyliczenie stałych marginesów i ikon dla folderów i plików
+                if item.type == FileSystemItemType.FOLDER:
+                    # icon(18) + btn(24) + spacing(16) + item_pad(8) + root_pad(30)
+                    static_width = 96 
+                else:
+                    # icon(18) + spacing(8) + item_pad(8) + root_pad(30)
+                    static_width = 64
+                    
+                # level offset (10 margin + 10 padding + 1 border = 21px na poziom)
+                # 6.5px to realistyczna średnia dla czcionki 13pt.
+                # Dodajemy płaski bufor 15px na wypadek szerszych znaków.
+                text_width = (len(item.name) * 6.5) + 15
+                item_width = (level * 21) + text_width + static_width
                 max_width = max(max_width, item_width)
                 
                 if item.type == FileSystemItemType.FOLDER and item.path in self.state.expanded_folders:
