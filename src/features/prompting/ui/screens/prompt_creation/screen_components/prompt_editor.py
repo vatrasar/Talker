@@ -1,6 +1,14 @@
 import flet as ft
 from features.prompting.ui.screens.prompt_creation.prompt_creation_view_model import PromptCreationViewModel
 
+def _calculate_min_lines(height: float) -> int:
+    """Calculates the minimum number of lines for text fields based on screen height."""
+    if height < 600:
+        return 2
+    if height < 900:
+        return 8
+    return 12
+
 @ft.component
 def PromptEditor(vm: PromptCreationViewModel) -> ft.Container:
     """
@@ -12,6 +20,19 @@ def PromptEditor(vm: PromptCreationViewModel) -> ft.Container:
     Used In: PromptCreationView.
     """
     state, _ = ft.use_state(vm.state)
+    page = ft.context.page
+
+    # State for dynamic height of text fields
+    min_lines, set_min_lines = ft.use_state(_calculate_min_lines(page.height))
+
+    def handle_resize(e: ft.PageResizeEvent):
+        set_min_lines(_calculate_min_lines(e.height))
+
+    def register_resize():
+        page.on_resize = handle_resize
+        return lambda: setattr(page, "on_resize", None)
+
+    ft.use_effect(register_resize, [])
 
     return ft.Container(
         expand=True,
@@ -19,7 +40,7 @@ def PromptEditor(vm: PromptCreationViewModel) -> ft.Container:
         content=ft.Column(
             controls=[
                 EditorInfoBar(state.project_name, state.project_path),
-                EditorMainArea(),
+                EditorMainArea(min_lines=min_lines),
                 EditorFooter(),
             ],
             spacing=10,
@@ -28,7 +49,7 @@ def PromptEditor(vm: PromptCreationViewModel) -> ft.Container:
     )
 
 @ft.component
-def EditorMainArea() -> ft.Column:
+def EditorMainArea(min_lines: int) -> ft.Column:
     """
     Main layout for the editor's interactive area.
 
@@ -38,16 +59,16 @@ def EditorMainArea() -> ft.Column:
     """
     return ft.Column(
         controls=[
-            PromptEditionSection(),
+            PromptEditionSection(min_lines=min_lines),
             EditorActionCenter(),
-            TranslatedPromptSection(),
+            TranslatedPromptSection(min_lines=min_lines),
         ],
         spacing=5,
         expand=True,
     )
 
 @ft.component
-def PromptEditionSection() -> ft.Column:
+def PromptEditionSection(min_lines: int) -> ft.Column:
     """
     Component for inputting source context or prompt data.
 
@@ -61,7 +82,7 @@ def PromptEditionSection() -> ft.Column:
                 label="Source Context / Whisper Output",
                 multiline=True,
                 expand=False,
-                min_lines=8,
+                min_lines=min_lines,
                 border=ft.InputBorder.OUTLINE,
                 border_color=ft.Colors.OUTLINE_VARIANT,
                 focused_border_color=ft.Colors.PRIMARY,
@@ -75,7 +96,7 @@ def PromptEditionSection() -> ft.Column:
     )
 
 @ft.component
-def TranslatedPromptSection() -> ft.Column:
+def TranslatedPromptSection(min_lines: int) -> ft.Column:
     """
     Component for displaying and editing the translated or generated prompt.
 
@@ -89,7 +110,7 @@ def TranslatedPromptSection() -> ft.Column:
                 label="Generated Prompt / Translation",
                 multiline=True,
                 expand=False,
-                min_lines=8,
+                min_lines=min_lines,
                 border=ft.InputBorder.OUTLINE,
                 border_color=ft.Colors.OUTLINE_VARIANT,
                 focused_border_color=ft.Colors.SECONDARY,
