@@ -24,17 +24,20 @@ def PromptCreationView() -> ft.Container:
     
     params = ft.use_route_params()
     
-    def on_mount():
+    async def load_project_data():
         name = urllib.parse.unquote(params.get("project_name", ""))
         path = urllib.parse.unquote(params.get("project_path", ""))
-        vm.set_project_info(name, path)
+        await vm.set_project_info(name, path)
+
+    def on_mount():
+        page.run_task(load_project_data)
 
     ft.use_effect(on_mount, [params])
 
     return ft.Container(
         content=ft.Row(
             controls=[
-                FileBrowserSidebar(),
+                FileBrowserSidebar(vm=vm),
                 PromptEditor(vm=vm),
                 PromptSettingsSidebar(),
             ],

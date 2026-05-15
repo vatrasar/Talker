@@ -1,7 +1,10 @@
 import flet as ft
+from features.prompting.domain.models.file_system_item import FileSystemItem
+from features.prompting.domain.enums.file_system_item_type import FileSystemItemType
+from features.prompting.ui.screens.prompt_creation.prompt_creation_view_model import PromptCreationViewModel
 
 @ft.component
-def FileBrowserSidebar() -> ft.Container:
+def FileBrowserSidebar(vm: PromptCreationViewModel) -> ft.Container:
     """
     Sidebar component for browsing project files.
 
@@ -9,21 +12,18 @@ def FileBrowserSidebar() -> ft.Container:
     Key UI Elements: Folder tree with manual expansion control.
     Used In: PromptCreationView.
     """
-    
-    hardcoded_tree = [
-        FileBrowserItem("src", children=[
-            FileBrowserItem("features", children=[
-                FileBrowserItem("prompting", children=[
-                    FileBrowserItem("ui", children=[
-                        FileBrowserItem("prompt_creation_view.py")
-                    ])
-                ])
-            ]),
-            FileBrowserItem("main.py")
-        ]),
-        FileBrowserItem("requirements.txt"),
-        FileBrowserItem("README.md")
-    ]
+    state, _ = ft.use_state(vm.state)
+
+    def build_tree_controls(items: list[FileSystemItem]) -> list[ft.Control]:
+        return [
+            FileBrowserItem(
+                name=item.name,
+                children=build_tree_controls(item.children) if item.type == FileSystemItemType.FOLDER else None
+            )
+            for item in items
+        ]
+
+    tree_controls = build_tree_controls(state.file_system_tree)
 
     return ft.Container(
         width=280,
@@ -38,7 +38,7 @@ def FileBrowserSidebar() -> ft.Container:
                 ]),
                 ft.Divider(height=20, thickness=1),
                 ft.Column(
-                    controls=hardcoded_tree,
+                    controls=tree_controls,
                     scroll=ft.ScrollMode.AUTO,
                     expand=True,
                     spacing=0
