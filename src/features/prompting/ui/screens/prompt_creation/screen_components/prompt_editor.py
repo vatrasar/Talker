@@ -19,30 +19,53 @@ def PromptEditor(vm: PromptCreationViewModel) -> ft.Container:
         content=ft.Column(
             controls=[
                 EditorInfoBar(state.project_name, state.project_path),
-                ft.TextField(
-                    label="Source Context / Whisper Output",
-                    multiline=True,
+                ft.Column(
+                    controls=[
+                        ft.Column(
+                            controls=[
+                                ft.TextField(
+                                    label="Source Context / Whisper Output",
+                                    multiline=True,
+                                    expand=False,
+                                    min_lines=8,
+                                    border=ft.InputBorder.OUTLINE,
+                                    border_color=ft.Colors.OUTLINE_VARIANT,
+                                    focused_border_color=ft.Colors.PRIMARY,
+                                    text_size=14,
+                                    dense=True,
+                                ),
+                            ],
+                            alignment=ft.MainAxisAlignment.CENTER,
+                            horizontal_alignment=ft.CrossAxisAlignment.STRETCH,
+                            expand=2,
+                        ),
+                        EditorActionCenter(),
+                        ft.Column(
+                            controls=[
+                                ft.TextField(
+                                    label="Generated Prompt / Translation",
+                                    multiline=True,
+                                    expand=False,
+                                    min_lines=8,
+                                    border=ft.InputBorder.OUTLINE,
+                                    border_color=ft.Colors.OUTLINE_VARIANT,
+                                    focused_border_color=ft.Colors.SECONDARY,
+                                    text_size=14,
+                                    dense=True,
+                                )
+                            ],
+                            horizontal_alignment=ft.CrossAxisAlignment.STRETCH,
+                            alignment=ft.MainAxisAlignment.CENTER,
+                            expand=2,
+                        ),
+                    ],
+                    spacing=5,
                     expand=True,
-                    min_lines=8,
-                    border=ft.InputBorder.OUTLINE,
-                    border_color=ft.Colors.OUTLINE_VARIANT,
-                    focused_border_color=ft.Colors.PRIMARY,
-                    text_size=14,
-                ),
-                EditorActionCenter(),
-                ft.TextField(
-                    label="Generated Prompt / Translation",
-                    multiline=True,
-                    expand=True,
-                    min_lines=8,
-                    border=ft.InputBorder.OUTLINE,
-                    border_color=ft.Colors.OUTLINE_VARIANT,
-                    focused_border_color=ft.Colors.SECONDARY,
-                    text_size=14,
                 ),
                 EditorFooter(),
             ],
-            spacing=15
+            spacing=10,
+            expand=True,
         )
     )
 
@@ -73,34 +96,40 @@ def EditorInfoBar(project_name: str, project_path: str) -> ft.Container:
     )
 
 @ft.component
-def EditorActionCenter() -> ft.Row:
+def EditorActionCenter() -> ft.Container:
     """
     Center action controls for prompt generation.
 
     Purpose: Contains the primary trigger for translating or generating content.
-    Key UI Elements: Floating action-style IconButton.
+    Key UI Elements: Custom action button with text and icons.
     Used In: PromptEditor.
     """
-    return ft.Row(
-        alignment=ft.MainAxisAlignment.CENTER,
-        controls=[
-            ft.Container(
-                content=ft.IconButton(
-                    icon=ft.Icons.TRANSLATE_ROUNDED,
-                    icon_size=32,
-                    icon_color=ft.Colors.ON_PRIMARY,
+    return ft.Container(
+        expand=1,
+        content=ft.Row(
+            alignment=ft.MainAxisAlignment.CENTER,
+            controls=[
+                ft.Container(
+                    content=ft.Row(
+                        controls=[
+                            ft.Icon(ft.Icons.KEYBOARD_ARROW_DOWN_ROUNDED, color=ft.Colors.ON_PRIMARY),
+                            ft.Text("translate", color=ft.Colors.ON_PRIMARY, weight=ft.FontWeight.BOLD),
+                            ft.Icon(ft.Icons.KEYBOARD_ARROW_DOWN_ROUNDED, color=ft.Colors.ON_PRIMARY),
+                        ],
+                        tight=True,
+                        spacing=10,
+                    ),
+                    padding=ft.Padding(left=25, top=12, right=25, bottom=12),
+                    border_radius=30,
                     bgcolor=ft.Colors.PRIMARY,
-                    tooltip="Generate / Translate",
-                    on_click=lambda _: print("Translate action")
-                ),
-                padding=5,
-                shape=ft.BoxShape.CIRCLE,
-                shadow=ft.BoxShadow(
-                    blur_radius=10, 
-                    color=ft.Colors.with_opacity(0.3, ft.Colors.BLACK)
+                    on_click=lambda _: print("Translate action"),
+                    shadow=ft.BoxShadow(
+                        blur_radius=10, 
+                        color=ft.Colors.with_opacity(0.3, ft.Colors.BLACK)
+                    )
                 )
-            )
-        ]
+            ]
+        ),
     )
 
 @ft.component
@@ -109,11 +138,11 @@ def EditorFooter() -> ft.Row:
     Bottom action bar for secondary editor operations.
 
     Purpose: Provides copy and other utility actions.
-    Key UI Elements: Copy to clipboard button.
+    Key UI Elements: Copy to clipboard button centered.
     Used In: PromptEditor.
     """
     return ft.Row(
-        alignment=ft.MainAxisAlignment.END,
+        alignment=ft.MainAxisAlignment.CENTER,
         controls=[
             ft.Button(
                 "Copy to Clipboard",
