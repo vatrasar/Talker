@@ -55,7 +55,7 @@ def FileBrowserItem(name: str, children: list = None) -> ft.Column | ft.Containe
     """
     Represents an item (file or folder) in the file browser.
     
-    Purpose: Handles display and expansion logic for files and folders.
+    Purpose: Handles display and expansion logic for files and folders with animated transitions.
     """
     is_expanded, set_is_expanded = ft.use_state(False)
     is_hovered, set_is_hovered = ft.use_state(False)
@@ -123,7 +123,12 @@ def FileBrowserItem(name: str, children: list = None) -> ft.Column | ft.Containe
                 padding=ft.Padding.only(left=10),
                 margin=ft.Margin.only(left=10),
                 border=ft.Border(left=ft.BorderSide(1, ft.Colors.OUTLINE_VARIANT)),
-                visible=is_expanded,
+                animate=ft.Animation(300, ft.AnimationCurve.EASE_OUT),
+                animate_opacity=ft.Animation(300, ft.AnimationCurve.EASE_OUT),
+                height=None if is_expanded else 0,
+                width=None if is_expanded else 0,
+                opacity=1 if is_expanded else 0,
+                clip_behavior=ft.ClipBehavior.HARD_EDGE,
             )
         ],
         spacing=0
