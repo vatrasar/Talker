@@ -32,7 +32,7 @@ def PromptEditor(vm: PromptCreationViewModel) -> ft.Container:
         padding=ft.Padding(left=10, top=0, right=10, bottom=0),
         content=ft.Column(
             controls=[
-                EditorInfoBar(state.project_name, state.project_path),
+                EditorInfoBar(vm),
                 EditorMainArea(min_lines=min_lines),
                 EditorFooter(),
             ],
@@ -97,16 +97,20 @@ def TranslatedPromptSection(min_lines: int) -> ft.Column:
 
 
 @ft.component
-def EditorInfoBar(project_name: str, project_path: str) -> ft.Container:
+def EditorInfoBar(vm: PromptCreationViewModel) -> ft.Container:
+    state, _ = ft.use_state(vm.state)
     info_icon = ft.Icon(ft.Icons.INFO_OUTLINE, size=20, color=ft.Colors.PRIMARY)
     project_details = ft.Text(
-        f"Project: {project_name} | {project_path}", 
+        f"Project: {state.project_name} | {state.project_path}", 
         size=13, 
         weight=ft.FontWeight.W_500, 
         color=ft.Colors.ON_SURFACE_VARIANT
     )
     divider = ft.VerticalDivider()
-    status_text = ft.Text("Status: Ready", size=13, color=ft.Colors.SECONDARY)
+    
+    status_label = "Loading files..." if state.is_loading_files else "Ready"
+    status_color = ft.Colors.PRIMARY if state.is_loading_files else ft.Colors.SECONDARY
+    status_text = ft.Text(f"Status: {status_label}", size=13, color=status_color)
 
     return ft.Container(
         padding=10,

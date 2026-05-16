@@ -15,3 +15,4 @@ class PromptCreationState:
     file_system_tree: list[FileSystemItem] = field(default_factory=list)
     expanded_folders: set[str] = field(default_factory=set)
     sidebar_width: float = 280.0
+    is_loading_files: bool = False

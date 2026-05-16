@@ -26,15 +26,37 @@ def FileBrowserSidebar(vm: PromptCreationViewModel) -> ft.Container:
 
     header_icon = ft.Icon(ft.Icons.ACCOUNT_TREE_ROUNDED, color=ft.Colors.PRIMARY)
     header_text = ft.Text("Project Files", weight=ft.FontWeight.BOLD, size=18)
-    header_row = ft.Row([header_icon, header_text])
+    header_row = ft.Row(
+        controls=[
+            header_icon, 
+            header_text, 
+        ],
+        vertical_alignment=ft.CrossAxisAlignment.CENTER
+    )
     
     divider = ft.Divider(height=20, thickness=1)
     
     tree_list = ft.Column(
-        controls=build_tree_controls(state.file_system_tree),
+        controls=build_tree_controls(state.file_system_tree) if not state.is_loading_files else [],
         scroll=ft.ScrollMode.AUTO,
         expand=True,
-        spacing=0
+        spacing=0,
+        visible=not state.is_loading_files
+    )
+    
+    loading_content = ft.Column(
+        controls=[
+            ft.Container(
+                content=ft.ProgressRing(),
+                alignment=ft.Alignment.CENTER,
+                expand=True
+            ),
+            ft.Text("Loading files...", size=14, color=ft.Colors.OUTLINE)
+        ],
+        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+        alignment=ft.MainAxisAlignment.CENTER,
+        expand=True,
+        visible=state.is_loading_files
     )
 
     return ft.Container(
@@ -48,6 +70,7 @@ def FileBrowserSidebar(vm: PromptCreationViewModel) -> ft.Container:
                 header_row,
                 divider,
                 tree_list,
+                loading_content,
             ],
             expand=True
         )

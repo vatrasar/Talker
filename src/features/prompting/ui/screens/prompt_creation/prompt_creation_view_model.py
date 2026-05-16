@@ -33,13 +33,17 @@ class PromptCreationViewModel:
 
         Invoked By: set_project_info.
         """
-        result = await self._load_project_structure_use_case.execute(
-            self.state.project_path
-        )
+        self.state.is_loading_files = True
+        try:
+            result = await self._load_project_structure_use_case.execute(
+                self.state.project_path
+            )
 
-        if result.is_success:
-            self.state.file_system_tree = result.value
-            self._recalculate_sidebar_width()
+            if result.is_success:
+                self.state.file_system_tree = result.value
+                self._recalculate_sidebar_width()
+        finally:
+            self.state.is_loading_files = False
 
 
     async def toggle_folder(self, path: str) -> None:
