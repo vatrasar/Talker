@@ -31,8 +31,11 @@ class ProjectPickViewModel:
         Invoked By: ProjectPickView.
         """
         name = os.path.basename(path.rstrip(os.sep)) or path
-        await self._add_recent_project_use_case.execute(name, path)
-        await self.load_recent_projects()
+        result = await self._add_recent_project_use_case.execute(name, path)
+        if result.is_success:
+            await self.load_recent_projects()
+        else:
+            print(f"Failed to add project: {result.error}")
 
     async def load_recent_projects(self) -> None:
         """

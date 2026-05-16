@@ -1,8 +1,9 @@
 import os
-import asyncio
 from features.prompting.domain.models.file_system_item import FileSystemItem
 from features.prompting.domain.enums.file_system_item_type import FileSystemItemType
 from features.prompting.ui.screens.prompt_creation.prompt_creation_state import PromptCreationState
+from features.prompting.domain.use_cases.load_project_structure_use_case import LoadProjectStructureUseCase
+from core.models.result import Result
 
 class PromptCreationViewModel:
     """
@@ -12,8 +13,9 @@ class PromptCreationViewModel:
     Used In: PromptCreationView.
     """
 
-    def __init__(self):
+    def __init__(self, load_project_structure_use_case: LoadProjectStructureUseCase):
         self.state = PromptCreationState()
+        self._load_project_structure_use_case = load_project_structure_use_case
 
     async def set_project_info(self, name: str, path: str) -> None:
         """
@@ -31,61 +33,14 @@ class PromptCreationViewModel:
 
         Invoked By: set_project_info.
         """
-        if self._is_invalid_path(self.state.project_path):
-            return
-
-        self.state.file_system_tree = await asyncio.to_thread(
-            self._scan_directory, 
+        result = await self._load_project_structure_use_case.execute(
             self.state.project_path
         )
-        self._recalculate_sidebar_width()
 
-    def _is_invalid_path(self, path: str | None) -> bool:
-        return not path or not os.path.exists(path)
+        if result.is_success:
+            self.state.file_system_tree = result.value
+            self._recalculate_sidebar_width()
 
-    def _scan_directory(self, path: str) -> list[FileSystemItem]:
-        items = []
-
-        try:
-            items = self._get_directory_items(path)
-        except PermissionError as e:
-            self._handle_scan_error(path, e)
-        
-        items.sort(key=lambda x: (x.type != FileSystemItemType.FOLDER, x.name.lower()))
-        return items
-
-    def _get_directory_items(self, path: str) -> list[FileSystemItem]:
-        items = []
-        
-        for entry in os.scandir(path):
-            self._process_directory_entry(entry, items)
-            
-        return items
-
-    def _process_directory_entry(self, entry: os.DirEntry, items: list[FileSystemItem]) -> None:
-        if entry.name.startswith("."):
-            return
-            
-        if entry.is_dir():
-            items.append(self._create_folder_item(entry))
-            return
-            
-        items.append(self._create_file_item(entry))
-
-    def _create_folder_item(self, entry: os.DirEntry) -> FileSystemItem:
-        return FileSystemItem(
-            name=entry.name,
-            path=entry.path,
-            type=FileSystemItemType.FOLDER,
-            children=self._scan_directory(entry.path)
-        )
-
-    def _create_file_item(self, entry: os.DirEntry) -> FileSystemItem:
-        return FileSystemItem(
-            name=entry.name,
-            path=entry.path,
-            type=FileSystemItemType.FILE
-        )
 
     async def toggle_folder(self, path: str) -> None:
         """
@@ -128,7 +83,3 @@ class PromptCreationViewModel:
         
         process_items(self.state.file_system_tree, 0)
         self.state.sidebar_width = min(max_width, 600.0)
-
-    def _handle_scan_error(self, path: str, error: Exception) -> None:
-
-        print(f"Warning: Could not scan directory {path}: {error}")

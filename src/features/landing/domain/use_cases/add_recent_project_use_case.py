@@ -1,5 +1,7 @@
+import os
 from core.config import MAX_RECENT_PROJECTS
 from core.models.recent_project import RecentProject
+from core.models.result import Result
 from core.repository_contracts.i_recent_project_repository import IRecentProjectRepository
 
 
@@ -20,24 +22,14 @@ class AddRecentProjectUseCase:
         """
         self._recent_project_repository = recent_project_repository
 
-    async def execute(self, name: str, path: str) -> RecentProject:
-        """
-        Adds a new project or updates an existing one's last opened timestamp.
-        If the total count exceeds MAX_RECENT_PROJECTS, the oldest project is removed.
+    async def execute(self, name: str, path: str) -> Result[RecentProject, str]:
+        if not os.path.isdir(path):
+            return Result.fail(f"Invalid project path: '{path}' is not a valid directory.")
 
-        Invoked By: ProjectPickViewModel.handle_new_project.
-
-        Args:
-            name: The display name of the project.
-            path: The filesystem path to the project.
-
-        Returns:
-            RecentProject: The added or updated project domain model.
-        """
         project = await self._recent_project_repository.add_project(name, path)
         await self._enforce_project_limit()
 
-        return project
+        return Result.ok(project)
 
     async def _enforce_project_limit(self) -> None:
         """

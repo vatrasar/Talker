@@ -7,7 +7,7 @@ class RecentProject:
     """
     Domain model representing a recently opened project.
 
-    Used In: IRecentProjectRepository, RecentProjectRepository, ProjectPickViewModel.
+    Used In: IRecentProjectRepository, RecentProjectRepository, AddRecentProjectUseCase, ProjectPickViewModel.
     """
 
     id: int
