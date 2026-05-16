@@ -89,8 +89,9 @@ def FileBrowserItem(item: FileSystemItem, vm: PromptCreationViewModel, children:
     def on_hover(e: ft.ControlEvent):
         set_is_hovered(e.data == "true")
 
-    icon_type = (ft.Icons.FOLDER_OPEN if is_expanded else ft.Icons.FOLDER) if children else ft.Icons.INSERT_DRIVE_FILE_OUTLINED
-    icon_color = ft.Colors.PRIMARY if children else ft.Colors.OUTLINE
+    is_folder = item.type == FileSystemItemType.FOLDER
+    icon_type = (ft.Icons.FOLDER_OPEN if is_expanded else ft.Icons.FOLDER) if is_folder else ft.Icons.INSERT_DRIVE_FILE_OUTLINED
+    icon_color = ft.Colors.PRIMARY if is_folder else ft.Colors.OUTLINE
     item_icon = ft.Icon(icon_type, color=icon_color, size=18)
     
     item_text = ft.Text(
@@ -102,7 +103,7 @@ def FileBrowserItem(item: FileSystemItem, vm: PromptCreationViewModel, children:
     )
     
     expand_btn_controls = []
-    if children:
+    if is_folder:
         expand_btn_controls.append(
             ft.IconButton(
                 icon=ft.Icons.REMOVE_CIRCLE_OUTLINE if is_expanded else ft.Icons.ADD_CIRCLE_OUTLINE,
@@ -129,7 +130,7 @@ def FileBrowserItem(item: FileSystemItem, vm: PromptCreationViewModel, children:
         on_hover=on_hover,
     )
 
-    if not children:
+    if not is_folder:
         return item_row
 
     children_container = ft.Container(

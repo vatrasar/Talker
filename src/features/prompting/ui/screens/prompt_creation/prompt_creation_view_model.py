@@ -2,7 +2,7 @@ import os
 from features.prompting.domain.models.file_system_item import FileSystemItem
 from features.prompting.domain.enums.file_system_item_type import FileSystemItemType
 from features.prompting.ui.screens.prompt_creation.prompt_creation_state import PromptCreationState
-from features.prompting.domain.use_cases.load_project_structure_use_case import LoadProjectStructureUseCase
+from features.prompting.domain.services.project_structure_service import ProjectStructureService
 from core.models.result import Result
 
 class PromptCreationViewModel:
@@ -13,9 +13,9 @@ class PromptCreationViewModel:
     Used In: PromptCreationView.
     """
 
-    def __init__(self, load_project_structure_use_case: LoadProjectStructureUseCase):
+    def __init__(self, project_structure_service: ProjectStructureService):
         self.state = PromptCreationState()
-        self._load_project_structure_use_case = load_project_structure_use_case
+        self._project_structure_service = project_structure_service
 
     async def set_project_info(self, name: str, path: str) -> None:
         """
@@ -23,6 +23,10 @@ class PromptCreationViewModel:
 
         Invoked By: PromptCreationView.
         """
+        if self.state.project_path != path:
+            self._project_structure_service.clear_open_folders()
+            self.state.expanded_folders = set()
+
         self.state.project_name = name
         self.state.project_path = path
         await self.load_project_structure()
@@ -35,7 +39,7 @@ class PromptCreationViewModel:
         """
         self.state.is_loading_files = True
         try:
-            result = await self._load_project_structure_use_case.execute(
+            result = await self._project_structure_service.get_structure(
                 self.state.project_path
             )
 
@@ -45,21 +49,19 @@ class PromptCreationViewModel:
         finally:
             self.state.is_loading_files = False
 
-
     async def toggle_folder(self, path: str) -> None:
         """
         Toggles the expansion state of a folder and recalculates sidebar width.
         
         Invoked By: FileBrowserItem.
         """
-        new_expanded = set(self.state.expanded_folders)
-        if path in new_expanded:
-            new_expanded.remove(path)
+        if path in self.state.expanded_folders:
+            self._project_structure_service.close_folder(path)
         else:
-            new_expanded.add(path)
+            self._project_structure_service.open_folder(path)
             
-        self.state.expanded_folders = new_expanded
-        self._recalculate_sidebar_width()
+        self.state.expanded_folders = self._project_structure_service.get_open_folders()
+        await self.load_project_structure()
 
     def _recalculate_sidebar_width(self) -> None:
         max_width = 250.0
