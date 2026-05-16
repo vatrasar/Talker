@@ -34,16 +34,22 @@ def PromptCreationView() -> ft.Container:
 
     ft.use_effect(on_mount, [params])
 
+    file_browser = FileBrowserSidebar(vm=vm)
+    prompt_editor = PromptEditor(vm=vm)
+    settings_sidebar = PromptSettingsSidebar()
+    
+    main_row = ft.Row(
+        controls=[
+            file_browser,
+            prompt_editor,
+            settings_sidebar,
+        ],
+        expand=True,
+        spacing=0
+    )
+
     return ft.Container(
-        content=ft.Row(
-            controls=[
-                FileBrowserSidebar(vm=vm),
-                PromptEditor(vm=vm),
-                PromptSettingsSidebar(),
-            ],
-            expand=True,
-            spacing=0
-        ),
+        content=main_row,
         padding=15,
         expand=True,
         bgcolor=ft.Colors.SURFACE,

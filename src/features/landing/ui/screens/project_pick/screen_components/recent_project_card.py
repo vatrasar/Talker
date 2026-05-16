@@ -37,6 +37,18 @@ def RecentProjectCard(
     def handle_more_options(e: ft.ControlEvent) -> None:
         pass
 
+    card_content = ft.Row(
+        controls=[
+            ProjectIcon(),
+            ProjectInfo(name=project_name, path=project_path),
+            UpdatedTimestamp(text=updated_ago, visible=show_details),
+            MoreOptionsButton(on_click=handle_more_options),
+        ],
+        alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+        vertical_alignment=ft.CrossAxisAlignment.CENTER,
+        spacing=20,
+    )
+
     return ft.Container(
         key=f"recent_project_card_{project_path}",
         bgcolor=ft.Colors.SURFACE_CONTAINER_HIGH if is_hovered else ft.Colors.SURFACE_CONTAINER,
@@ -47,17 +59,7 @@ def RecentProjectCard(
         on_hover=handle_hover,
         animate=Styles.CARD_ANIMATION,
         scale=1.01 if is_hovered else 1.0,
-        content=ft.Row(
-            controls=[
-                ProjectIcon(),
-                ProjectInfo(name=project_name, path=project_path),
-                UpdatedTimestamp(text=updated_ago, visible=show_details),
-                MoreOptionsButton(on_click=handle_more_options),
-            ],
-            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-            vertical_alignment=ft.CrossAxisAlignment.CENTER,
-            spacing=20,
-        ),
+        content=card_content,
     )
 
 
@@ -66,8 +68,10 @@ def RecentProjectCard(
 
 @ft.component
 def ProjectIcon():
+    folder_icon = ft.Icon(ft.Icons.FOLDER_OUTLINED, color=ft.Colors.PRIMARY, size=24)
+    
     return ft.Container(
-        content=ft.Icon(ft.Icons.FOLDER_OUTLINED, color=ft.Colors.PRIMARY, size=24),
+        content=folder_icon,
         bgcolor=ft.Colors.SURFACE_CONTAINER_HIGH,
         width=48,
         height=48,
@@ -78,19 +82,20 @@ def ProjectIcon():
 
 @ft.component
 def ProjectInfo(name: str, path: str):
+    name_text = ft.Text(
+        name,
+        style=Styles.CARD_NAME_STYLE,
+    )
+    
+    path_text = ft.Text(
+        path,
+        style=Styles.CARD_PATH_STYLE,
+        overflow=ft.TextOverflow.ELLIPSIS,
+        max_lines=1,
+    )
+
     return ft.Column(
-        controls=[
-            ft.Text(
-                name,
-                style=Styles.CARD_NAME_STYLE,
-            ),
-            ft.Text(
-                path,
-                style=Styles.CARD_PATH_STYLE,
-                overflow=ft.TextOverflow.ELLIPSIS,
-                max_lines=1,
-            ),
-        ],
+        controls=[name_text, path_text],
         expand=True,
         spacing=4,
     )

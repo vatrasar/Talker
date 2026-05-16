@@ -55,20 +55,20 @@ def EditorMainArea(min_lines: int) -> ft.Column:
 
 @ft.component
 def PromptEditionSection(min_lines: int) -> ft.Column:
+    text_field = ft.TextField(
+        label="Source Context / Whisper Output",
+        multiline=True,
+        expand=False,
+        min_lines=min_lines,
+        border=ft.InputBorder.OUTLINE,
+        border_color=ft.Colors.OUTLINE_VARIANT,
+        focused_border_color=ft.Colors.PRIMARY,
+        text_size=14,
+        dense=True,
+    )
+
     return ft.Column(
-        controls=[
-            ft.TextField(
-                label="Source Context / Whisper Output",
-                multiline=True,
-                expand=False,
-                min_lines=min_lines,
-                border=ft.InputBorder.OUTLINE,
-                border_color=ft.Colors.OUTLINE_VARIANT,
-                focused_border_color=ft.Colors.PRIMARY,
-                text_size=14,
-                dense=True,
-            ),
-        ],
+        controls=[text_field],
         alignment=ft.MainAxisAlignment.CENTER,
         horizontal_alignment=ft.CrossAxisAlignment.STRETCH,
         expand=2,
@@ -76,20 +76,20 @@ def PromptEditionSection(min_lines: int) -> ft.Column:
 
 @ft.component
 def TranslatedPromptSection(min_lines: int) -> ft.Column:
+    text_field = ft.TextField(
+        label="Generated Prompt / Translation",
+        multiline=True,
+        expand=False,
+        min_lines=min_lines,
+        border=ft.InputBorder.OUTLINE,
+        border_color=ft.Colors.OUTLINE_VARIANT,
+        focused_border_color=ft.Colors.SECONDARY,
+        text_size=14,
+        dense=True,
+    )
+
     return ft.Column(
-        controls=[
-            ft.TextField(
-                label="Generated Prompt / Translation",
-                multiline=True,
-                expand=False,
-                min_lines=min_lines,
-                border=ft.InputBorder.OUTLINE,
-                border_color=ft.Colors.OUTLINE_VARIANT,
-                focused_border_color=ft.Colors.SECONDARY,
-                text_size=14,
-                dense=True,
-            )
-        ],
+        controls=[text_field],
         horizontal_alignment=ft.CrossAxisAlignment.STRETCH,
         alignment=ft.MainAxisAlignment.CENTER,
         expand=2,
@@ -98,69 +98,76 @@ def TranslatedPromptSection(min_lines: int) -> ft.Column:
 
 @ft.component
 def EditorInfoBar(project_name: str, project_path: str) -> ft.Container:
+    info_icon = ft.Icon(ft.Icons.INFO_OUTLINE, size=20, color=ft.Colors.PRIMARY)
+    project_details = ft.Text(
+        f"Project: {project_name} | {project_path}", 
+        size=13, 
+        weight=ft.FontWeight.W_500, 
+        color=ft.Colors.ON_SURFACE_VARIANT
+    )
+    divider = ft.VerticalDivider()
+    status_text = ft.Text("Status: Ready", size=13, color=ft.Colors.SECONDARY)
+
     return ft.Container(
         padding=10,
         bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST,
         border_radius=8,
         content=ft.Row([
-            ft.Icon(ft.Icons.INFO_OUTLINE, size=20, color=ft.Colors.PRIMARY),
-            ft.Text(
-                f"Project: {project_name} | {project_path}", 
-                size=13, 
-                weight=ft.FontWeight.W_500, 
-                color=ft.Colors.ON_SURFACE_VARIANT
-            ),
-            ft.VerticalDivider(),
-            ft.Text("Status: Ready", size=13, color=ft.Colors.SECONDARY)
+            info_icon,
+            project_details,
+            divider,
+            status_text
         ])
     )
 
 @ft.component
 def EditorActionCenter() -> ft.Container:
+    icon_left = ft.Icon(ft.Icons.KEYBOARD_ARROW_DOWN_ROUNDED, color=ft.Colors.ON_PRIMARY)
+    action_text = ft.Text("translate", color=ft.Colors.ON_PRIMARY, weight=ft.FontWeight.BOLD)
+    icon_right = ft.Icon(ft.Icons.KEYBOARD_ARROW_DOWN_ROUNDED, color=ft.Colors.ON_PRIMARY)
+    
+    action_row = ft.Row(
+        controls=[icon_left, action_text, icon_right],
+        tight=True,
+        spacing=10,
+    )
+    
+    action_button = ft.Container(
+        content=action_row,
+        padding=ft.Padding(left=25, top=12, right=25, bottom=12),
+        border_radius=30,
+        bgcolor=ft.Colors.PRIMARY,
+        on_click=lambda _: print("Translate action"),
+        shadow=ft.BoxShadow(
+            blur_radius=10, 
+            color=ft.Colors.with_opacity(0.3, ft.Colors.BLACK)
+        )
+    )
+
     return ft.Container(
         expand=1,
         content=ft.Row(
             alignment=ft.MainAxisAlignment.CENTER,
-            controls=[
-                ft.Container(
-                    content=ft.Row(
-                        controls=[
-                            ft.Icon(ft.Icons.KEYBOARD_ARROW_DOWN_ROUNDED, color=ft.Colors.ON_PRIMARY),
-                            ft.Text("translate", color=ft.Colors.ON_PRIMARY, weight=ft.FontWeight.BOLD),
-                            ft.Icon(ft.Icons.KEYBOARD_ARROW_DOWN_ROUNDED, color=ft.Colors.ON_PRIMARY),
-                        ],
-                        tight=True,
-                        spacing=10,
-                    ),
-                    padding=ft.Padding(left=25, top=12, right=25, bottom=12),
-                    border_radius=30,
-                    bgcolor=ft.Colors.PRIMARY,
-                    on_click=lambda _: print("Translate action"),
-                    shadow=ft.BoxShadow(
-                        blur_radius=10, 
-                        color=ft.Colors.with_opacity(0.3, ft.Colors.BLACK)
-                    )
-                )
-            ]
+            controls=[action_button]
         ),
     )
 
 @ft.component
 def EditorFooter() -> ft.Row:
+    copy_btn = ft.Button(
+        "Copy to Clipboard",
+        icon=ft.Icons.CONTENT_COPY_ROUNDED,
+        style=ft.ButtonStyle(
+            color=ft.Colors.ON_SECONDARY_CONTAINER,
+            bgcolor=ft.Colors.SECONDARY_CONTAINER,
+            padding=20,
+        ),
+        on_click=lambda _: print("Copy to clipboard")
+    )
+
     return ft.Row(
         alignment=ft.MainAxisAlignment.CENTER,
-        controls=[
-            ft.Button(
-                "Copy to Clipboard",
-                icon=ft.Icons.CONTENT_COPY_ROUNDED,
-                style=ft.ButtonStyle(
-                    color=ft.Colors.ON_SECONDARY_CONTAINER,
-                    bgcolor=ft.Colors.SECONDARY_CONTAINER,
-                    padding=20,
-                ),
-                on_click=lambda _: print("Copy to clipboard")
-            )
-        ]
+        controls=[copy_btn]
     )
 
 def _calculate_min_lines(height: float) -> int:

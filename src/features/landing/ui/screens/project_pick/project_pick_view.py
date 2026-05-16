@@ -60,8 +60,7 @@ def ProjectPickView() -> ft.Container:
 
     ft.use_effect(register_resize, [])
 
-    # Main structure assembly
-    main_column = ft.Column(
+    main_content_column = ft.Column(
         col={"xs": 12, "sm": 10, "md": 10, "lg": 8, "xl": 8},
         offset={"sm": 1, "md": 1, "lg": 2, "xl": 2},
         controls=[
@@ -72,18 +71,20 @@ def ProjectPickView() -> ft.Container:
         ],
         spacing=10,
     )
+    
+    responsive_container = ft.ResponsiveRow(
+        controls=[main_content_column],
+        alignment=ft.MainAxisAlignment.CENTER,
+    )
+
+    list_view = ft.ListView(
+        controls=[responsive_container],
+        spacing=10,
+        padding=ft.Padding.symmetric(horizontal=20),
+    )
 
     return ft.Container(
-        content=ft.ListView(
-            controls=[
-                ft.ResponsiveRow(
-                    controls=[main_column],
-                    alignment=ft.MainAxisAlignment.CENTER,
-                )
-            ],
-            spacing=10,
-            padding=ft.Padding.symmetric(horizontal=20),
-        ),
+        content=list_view,
         bgcolor=ft.Colors.SURFACE,
         padding=ft.Padding.symmetric(vertical=60),
         expand=True,
@@ -92,18 +93,20 @@ def ProjectPickView() -> ft.Container:
 
 @ft.component
 def LogoSection() -> ft.Container:
+    chart_icon = ft.Icon(ft.Icons.BAR_CHART, color=ft.Colors.PRIMARY, size=48)
+    app_title = ft.Text(
+        "Talker",
+        style=Styles.LOGO_TEXT_STYLE,
+    )
+    
+    logo_row = ft.Row(
+        controls=[chart_icon, app_title],
+        alignment=ft.MainAxisAlignment.CENTER,
+        wrap=True,
+    )
+
     return ft.Container(
-        content=ft.Row(
-            controls=[
-                ft.Icon(ft.Icons.BAR_CHART, color=ft.Colors.PRIMARY, size=48),
-                ft.Text(
-                    "Talker",
-                    style=Styles.LOGO_TEXT_STYLE,
-                ),
-            ],
-            alignment=ft.MainAxisAlignment.CENTER,
-            wrap=True,
-        ),
+        content=logo_row,
         margin=ft.Margin.only(bottom=80),
         alignment=ft.Alignment.CENTER,
     )
@@ -111,69 +114,85 @@ def LogoSection() -> ft.Container:
 
 @ft.component
 def WelcomeHeaderWithNewProject(is_xs: bool, on_new_project: Callable[[ft.ControlEvent], Any]) -> ft.ResponsiveRow:
-    welcome_text = ft.Column(
+    return ft.ResponsiveRow(
         controls=[
-            ft.Text(
-                "Welcome back.",
-                style=Styles.WELCOME_TITLE_STYLE,
-                text_align=ft.TextAlign.CENTER if is_xs else ft.TextAlign.LEFT,
-            ),
-            ft.Text(
-                "Here are your recent workspaces.",
-                style=Styles.WELCOME_SUBTITLE_STYLE,
-                text_align=ft.TextAlign.CENTER if is_xs else ft.TextAlign.LEFT,
-            ),
+            WelcomeText(is_xs=is_xs),
+            NewProjectButton(is_xs=is_xs, on_new_project=on_new_project),
         ],
+        vertical_alignment=ft.CrossAxisAlignment.CENTER,
+    )
+
+
+@ft.component
+def WelcomeText(is_xs: bool) -> ft.Column:
+    welcome_title = ft.Text(
+        "Welcome back.",
+        style=Styles.WELCOME_TITLE_STYLE,
+        text_align=ft.TextAlign.CENTER if is_xs else ft.TextAlign.LEFT,
+    )
+    
+    welcome_subtitle = ft.Text(
+        "Here are your recent workspaces.",
+        style=Styles.WELCOME_SUBTITLE_STYLE,
+        text_align=ft.TextAlign.CENTER if is_xs else ft.TextAlign.LEFT,
+    )
+
+    return ft.Column(
+        controls=[welcome_title, welcome_subtitle],
         col={"xs": 12, "sm": 8, "md": 8},
         spacing=4,
         horizontal_alignment=ft.CrossAxisAlignment.CENTER if is_xs else ft.CrossAxisAlignment.START,
     )
 
-    new_project_btn = ft.Container(
-        content=ft.OutlinedButton(
-            content=ft.Row(
-                controls=[
-                    ft.Icon(ft.Icons.CREATE_NEW_FOLDER_OUTLINED, size=18, color=ft.Colors.PRIMARY),
-                    ft.Text("Open New Project", size=14, color=ft.Colors.PRIMARY, weight=ft.FontWeight.W_500),
-                ],
-                spacing=8,
-                tight=True,
-            ),
-            style=Styles.NEW_PROJECT_BTN_STYLE,
-            on_click=on_new_project,
-        ),
-        col={"xs": 12, "sm": 4, "md": 4},
-        alignment=ft.Alignment.CENTER if is_xs else ft.Alignment.CENTER_RIGHT,
+
+@ft.component
+def NewProjectButton(is_xs: bool, on_new_project: Callable[[ft.ControlEvent], Any]) -> ft.Container:
+    folder_icon = ft.Icon(ft.Icons.CREATE_NEW_FOLDER_OUTLINED, size=18, color=ft.Colors.PRIMARY)
+    button_text = ft.Text("Open New Project", size=14, color=ft.Colors.PRIMARY, weight=ft.FontWeight.W_500)
+    
+    button_content_row = ft.Row(
+        controls=[folder_icon, button_text],
+        spacing=8,
+        tight=True,
+    )
+    
+    outlined_button = ft.OutlinedButton(
+        content=button_content_row,
+        style=Styles.NEW_PROJECT_BTN_STYLE,
+        on_click=on_new_project,
     )
 
-    return ft.ResponsiveRow(
-        controls=[welcome_text, new_project_btn],
-        vertical_alignment=ft.CrossAxisAlignment.CENTER,
+    return ft.Container(
+        content=outlined_button,
+        col={"xs": 12, "sm": 4, "md": 4},
+        alignment=ft.Alignment.CENTER if is_xs else ft.Alignment.CENTER_RIGHT,
     )
 
 
 @ft.component
 def RecentProjectsList(is_xs: bool, projects: list[Project]) -> ft.Column:
     if not projects:
+        empty_icon = ft.Icon(ft.Icons.FOLDER_OPEN_OUTLINED, size=40, color=ft.Colors.OUTLINE)
+        empty_text = ft.Text(
+            "No recent projects yet.\nOpen a folder to get started.",
+            style=Styles.WELCOME_SUBTITLE_STYLE,
+            text_align=ft.TextAlign.CENTER,
+        )
+        
+        empty_column = ft.Column(
+            controls=[empty_icon, empty_text],
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+            spacing=10,
+        )
+        
+        empty_container = ft.Container(
+            content=empty_column,
+            padding=ft.Padding.symmetric(vertical=40),
+            alignment=ft.Alignment.CENTER,
+        )
+
         return ft.Column(
-            controls=[
-                ft.Container(
-                    content=ft.Column(
-                        controls=[
-                            ft.Icon(ft.Icons.FOLDER_OPEN_OUTLINED, size=40, color=ft.Colors.OUTLINE),
-                            ft.Text(
-                                "No recent projects yet.\nOpen a folder to get started.",
-                                style=Styles.WELCOME_SUBTITLE_STYLE,
-                                text_align=ft.TextAlign.CENTER,
-                            ),
-                        ],
-                        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                        spacing=10,
-                    ),
-                    padding=ft.Padding.symmetric(vertical=40),
-                    alignment=ft.Alignment.CENTER,
-                )
-            ]
+            controls=[empty_container]
         )
 
     return ft.Column(

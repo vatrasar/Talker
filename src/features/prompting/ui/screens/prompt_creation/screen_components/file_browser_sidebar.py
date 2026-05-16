@@ -24,7 +24,18 @@ def FileBrowserSidebar(vm: PromptCreationViewModel) -> ft.Container:
             for item in items
         ]
 
-    tree_controls = build_tree_controls(state.file_system_tree)
+    header_icon = ft.Icon(ft.Icons.ACCOUNT_TREE_ROUNDED, color=ft.Colors.PRIMARY)
+    header_text = ft.Text("Project Files", weight=ft.FontWeight.BOLD, size=18)
+    header_row = ft.Row([header_icon, header_text])
+    
+    divider = ft.Divider(height=20, thickness=1)
+    
+    tree_list = ft.Column(
+        controls=build_tree_controls(state.file_system_tree),
+        scroll=ft.ScrollMode.AUTO,
+        expand=True,
+        spacing=0
+    )
 
     return ft.Container(
         animate=ft.Animation(300, ft.AnimationCurve.EASE_OUT),
@@ -34,17 +45,9 @@ def FileBrowserSidebar(vm: PromptCreationViewModel) -> ft.Container:
         padding=15,
         content=ft.Column(
             controls=[
-                ft.Row([
-                    ft.Icon(ft.Icons.ACCOUNT_TREE_ROUNDED, color=ft.Colors.PRIMARY),
-                    ft.Text("Project Files", weight=ft.FontWeight.BOLD, size=18),
-                ]),
-                ft.Divider(height=20, thickness=1),
-                ft.Column(
-                    controls=tree_controls,
-                    scroll=ft.ScrollMode.AUTO,
-                    expand=True,
-                    spacing=0
-                ),
+                header_row,
+                divider,
+                tree_list,
             ],
             expand=True
         )
@@ -63,25 +66,21 @@ def FileBrowserItem(item: FileSystemItem, vm: PromptCreationViewModel, children:
     def on_hover(e: ft.ControlEvent):
         set_is_hovered(e.data == "true")
 
-    # Build controls conditionally to keep the UI tree lean
-    row_controls = [
-        ft.Icon(
-            (ft.Icons.FOLDER_OPEN if is_expanded else ft.Icons.FOLDER) 
-            if children else ft.Icons.INSERT_DRIVE_FILE_OUTLINED,
-            color=ft.Colors.PRIMARY if children else ft.Colors.OUTLINE,
-            size=18
-        ),
-        ft.Text(
-            item.name, 
-            size=13, 
-            color=ft.Colors.PRIMARY if is_expanded else ft.Colors.ON_SURFACE,
-            weight=ft.FontWeight.W_500 if is_expanded else None,
-            no_wrap=True,
-        )
-    ]
-
+    icon_type = (ft.Icons.FOLDER_OPEN if is_expanded else ft.Icons.FOLDER) if children else ft.Icons.INSERT_DRIVE_FILE_OUTLINED
+    icon_color = ft.Colors.PRIMARY if children else ft.Colors.OUTLINE
+    item_icon = ft.Icon(icon_type, color=icon_color, size=18)
+    
+    item_text = ft.Text(
+        item.name, 
+        size=13, 
+        color=ft.Colors.PRIMARY if is_expanded else ft.Colors.ON_SURFACE,
+        weight=ft.FontWeight.W_500 if is_expanded else None,
+        no_wrap=True,
+    )
+    
+    expand_btn_controls = []
     if children:
-        row_controls.append(
+        expand_btn_controls.append(
             ft.IconButton(
                 icon=ft.Icons.REMOVE_CIRCLE_OUTLINE if is_expanded else ft.Icons.ADD_CIRCLE_OUTLINE,
                 icon_size=16,
@@ -92,14 +91,15 @@ def FileBrowserItem(item: FileSystemItem, vm: PromptCreationViewModel, children:
                 style=ft.ButtonStyle(padding=ft.Padding.all(0)),
             )
         )
+        
+    row_content = ft.Row(
+        controls=[item_icon, item_text, *expand_btn_controls],
+        spacing=8,
+        vertical_alignment=ft.CrossAxisAlignment.CENTER,
+    )
 
-    # Layout for the item row
     item_row = ft.Container(
-        content=ft.Row(
-            controls=row_controls,
-            spacing=8,
-            vertical_alignment=ft.CrossAxisAlignment.CENTER,
-        ),
+        content=row_content,
         padding=ft.Padding.only(left=4, top=2, right=4, bottom=2),
         border_radius=8,
         bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST if is_hovered else None,
@@ -109,24 +109,26 @@ def FileBrowserItem(item: FileSystemItem, vm: PromptCreationViewModel, children:
     if not children:
         return item_row
 
+    children_container = ft.Container(
+        content=ft.Column(
+            controls=children,
+            spacing=0,
+        ),
+        padding=ft.Padding.only(left=10),
+        margin=ft.Margin.only(left=10),
+        border=ft.Border(left=ft.BorderSide(1, ft.Colors.OUTLINE_VARIANT)),
+        animate=ft.Animation(300, ft.AnimationCurve.EASE_OUT),
+        animate_opacity=ft.Animation(300, ft.AnimationCurve.EASE_OUT),
+        height=None if is_expanded else 0,
+        width=None if is_expanded else 0,
+        opacity=1 if is_expanded else 0,
+        clip_behavior=ft.ClipBehavior.HARD_EDGE,
+    )
+
     return ft.Column(
         controls=[
             item_row,
-            ft.Container(
-                content=ft.Column(
-                    controls=children,
-                    spacing=0,
-                ),
-                padding=ft.Padding.only(left=10),
-                margin=ft.Margin.only(left=10),
-                border=ft.Border(left=ft.BorderSide(1, ft.Colors.OUTLINE_VARIANT)),
-                animate=ft.Animation(300, ft.AnimationCurve.EASE_OUT),
-                animate_opacity=ft.Animation(300, ft.AnimationCurve.EASE_OUT),
-                height=None if is_expanded else 0,
-                width=None if is_expanded else 0,
-                opacity=1 if is_expanded else 0,
-                clip_behavior=ft.ClipBehavior.HARD_EDGE,
-            )
+            children_container
         ],
         spacing=0
     )
