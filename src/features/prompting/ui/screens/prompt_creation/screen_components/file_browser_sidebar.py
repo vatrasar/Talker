@@ -36,12 +36,14 @@ def FileBrowserSidebar(vm: PromptCreationViewModel) -> ft.Container:
     
     divider = ft.Divider(height=20, thickness=1)
     
+    show_tree = len(state.file_system_tree) > 0
+    
     tree_list = ft.Column(
-        controls=build_tree_controls(state.file_system_tree) if not state.is_loading_files else [],
+        controls=build_tree_controls(state.file_system_tree) if show_tree else [],
         scroll=ft.ScrollMode.AUTO,
         expand=True,
         spacing=0,
-        visible=not state.is_loading_files
+        visible=show_tree
     )
     
     loading_content = ft.Column(
@@ -56,7 +58,7 @@ def FileBrowserSidebar(vm: PromptCreationViewModel) -> ft.Container:
         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
         alignment=ft.MainAxisAlignment.CENTER,
         expand=True,
-        visible=state.is_loading_files
+        visible=state.is_loading_files and not show_tree
     )
 
     return ft.Container(
@@ -102,22 +104,27 @@ def FileBrowserItem(item: FileSystemItem, vm: PromptCreationViewModel, children:
         no_wrap=True,
     )
     
-    expand_btn_controls = []
+    expand_icon = None
     if is_folder:
-        expand_btn_controls.append(
-            ft.IconButton(
-                icon=ft.Icons.REMOVE_CIRCLE_OUTLINE if is_expanded else ft.Icons.ADD_CIRCLE_OUTLINE,
-                icon_size=16,
-                icon_color=ft.Colors.PRIMARY_CONTAINER,
-                on_click=toggle_expand,
-                width=24,
-                height=24,
-                style=ft.ButtonStyle(padding=ft.Padding.all(0)),
-            )
+        expand_icon = ft.Container(
+            content=ft.Icon(
+                ft.Icons.KEYBOARD_ARROW_RIGHT_ROUNDED,
+                size=18,
+                color=ft.Colors.PRIMARY if is_expanded else ft.Colors.OUTLINE,
+                rotate=ft.Rotate(1.5708 if is_expanded else 0),
+                animate_rotation=ft.Animation(300, ft.AnimationCurve.EASE_OUT),
+            ),
+            on_click=toggle_expand,
+            ink=True,
+            border_radius=4,
         )
         
     row_content = ft.Row(
-        controls=[item_icon, item_text, *expand_btn_controls],
+        controls=[
+            expand_icon if expand_icon else ft.Container(width=18), 
+            item_icon, 
+            item_text
+        ],
         spacing=8,
         vertical_alignment=ft.CrossAxisAlignment.CENTER,
     )
@@ -141,12 +148,9 @@ def FileBrowserItem(item: FileSystemItem, vm: PromptCreationViewModel, children:
         padding=ft.Padding.only(left=10),
         margin=ft.Margin.only(left=10),
         border=ft.Border(left=ft.BorderSide(1, ft.Colors.OUTLINE_VARIANT)),
-        animate=ft.Animation(300, ft.AnimationCurve.EASE_OUT),
-        animate_opacity=ft.Animation(300, ft.AnimationCurve.EASE_OUT),
-        height=None if is_expanded else 0,
-        width=None if is_expanded else 0,
+        visible=is_expanded,
         opacity=1 if is_expanded else 0,
-        clip_behavior=ft.ClipBehavior.HARD_EDGE,
+        animate_opacity=ft.Animation(300, ft.AnimationCurve.EASE_OUT),
     )
 
     return ft.Column(
@@ -154,5 +158,6 @@ def FileBrowserItem(item: FileSystemItem, vm: PromptCreationViewModel, children:
             item_row,
             children_container
         ],
-        spacing=0
+        spacing=0,
+        animate_size=ft.Animation(300, ft.AnimationCurve.EASE_OUT),
     )

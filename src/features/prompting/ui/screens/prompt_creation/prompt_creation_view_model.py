@@ -31,13 +31,14 @@ class PromptCreationViewModel:
         self.state.project_path = path
         await self.load_project_structure()
 
-    async def load_project_structure(self) -> None:
+    async def load_project_structure(self, show_loading: bool = True) -> None:
         """
         Loads the file system structure of the current project path into the state.
 
         Invoked By: set_project_info.
         """
-        self.state.is_loading_files = True
+        if show_loading:
+            self.state.is_loading_files = True
         try:
             result = await self._project_structure_service.get_structure(
                 self.state.project_path
@@ -47,7 +48,8 @@ class PromptCreationViewModel:
                 self.state.file_system_tree = result.value
                 self._recalculate_sidebar_width()
         finally:
-            self.state.is_loading_files = False
+            if show_loading:
+                self.state.is_loading_files = False
 
     async def toggle_folder(self, path: str) -> None:
         """
@@ -61,26 +63,23 @@ class PromptCreationViewModel:
             self._project_structure_service.open_folder(path)
             
         self.state.expanded_folders = self._project_structure_service.get_open_folders()
-        await self.load_project_structure()
+        await self.load_project_structure(show_loading=False)
 
     def _recalculate_sidebar_width(self) -> None:
-        max_width = 250.0
+        # Base minimum width
+        max_width = 280.0
         
         def process_items(items, level):
             nonlocal max_width
             for item in items:
-                # Dokładne wyliczenie stałych marginesów i ikon dla folderów i plików
-                if item.type == FileSystemItemType.FOLDER:
-                    # icon(18) + btn(24) + spacing(16) + item_pad(8) + root_pad(30)
-                    static_width = 96 
-                else:
-                    # icon(18) + spacing(8) + item_pad(8) + root_pad(30)
-                    static_width = 64
+                # Precise static width calculation:
+                # root_pad(30) + item_pad(8) + expand_icon_slot(18) + spacing(8) + icon(18) + spacing(8) = 90
+                static_width = 64
                     
-                # level offset (10 margin + 10 padding + 1 border = 21px na poziom)
-                # 6.5px to realistyczna średnia dla czcionki 13pt.
-                # Dodajemy płaski bufor 15px na wypadek szerszych znaków.
-                text_width = (len(item.name) * 6.5) + 15
+                # level offset (10 margin + 10 padding + 1 border = 21px per level)
+                # 8.0px is a safer average for 13pt font.
+                # Plus a small buffer (10px).
+                text_width = (len(item.name) * 7.5) + 10
                 item_width = (level * 21) + text_width + static_width
                 max_width = max(max_width, item_width)
                 
@@ -88,4 +87,5 @@ class PromptCreationViewModel:
                     process_items(item.children, level + 1)
         
         process_items(self.state.file_system_tree, 0)
+        # Limit the width to avoid taking too much screen space
         self.state.sidebar_width = min(max_width, 600.0)
