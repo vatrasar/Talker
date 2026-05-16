@@ -66,26 +66,21 @@ class PromptCreationViewModel:
         await self.load_project_structure(show_loading=False)
 
     def _recalculate_sidebar_width(self) -> None:
-        # Base minimum width
-        max_width = 280.0
-        
-        def process_items(items, level):
-            nonlocal max_width
-            for item in items:
-                # Precise static width calculation:
-                # root_pad(30) + item_pad(8) + expand_icon_slot(18) + spacing(8) + icon(18) + spacing(8) = 90
-                static_width = 64
-                    
-                # level offset (10 margin + 10 padding + 1 border = 21px per level)
-                # 8.0px is a safer average for 13pt font.
-                # Plus a small buffer (10px).
-                text_width = (len(item.name) * 7.5) + 10
-                item_width = (level * 21) + text_width + static_width
-                max_width = max(max_width, item_width)
-                
-                if item.type == FileSystemItemType.FOLDER and item.path in self.state.expanded_folders:
-                    process_items(item.children, level + 1)
-        
-        process_items(self.state.file_system_tree, 0)
-        # Limit the width to avoid taking too much screen space
-        self.state.sidebar_width = min(max_width, 600.0)
+        max_width = self._calculate_max_item_width(self.state.file_system_tree, 0)
+        final_width = max(280.0, max_width)
+        self.state.sidebar_width = min(final_width, 600.0)
+
+    def _calculate_max_item_width(self, items: list[FileSystemItem], level: int) -> float:
+        max_width = 0.0
+
+        for item in items:
+            static_width = 70.0
+            text_width = (len(item.name) * 7.5) + 10.0
+            item_width = (level * 21.0) + text_width + static_width
+            max_width = max(max_width, item_width)
+
+            if item.type == FileSystemItemType.FOLDER and item.path in self.state.expanded_folders:
+                child_max = self._calculate_max_item_width(item.children, level + 1)
+                max_width = max(max_width, child_max)
+
+        return max_width
