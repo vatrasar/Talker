@@ -66,7 +66,6 @@ def RecentProjectCard(
 
 @ft.component
 def ProjectIcon():
-    """Displays the visual icon representing a project folder."""
     return ft.Container(
         content=ft.Icon(ft.Icons.FOLDER_OUTLINED, color=ft.Colors.PRIMARY, size=24),
         bgcolor=ft.Colors.SURFACE_CONTAINER_HIGH,
@@ -79,7 +78,6 @@ def ProjectIcon():
 
 @ft.component
 def ProjectInfo(name: str, path: str):
-    """Displays the project's name and its file path location."""
     return ft.Column(
         controls=[
             ft.Text(
@@ -100,7 +98,6 @@ def ProjectInfo(name: str, path: str):
 
 @ft.component
 def UpdatedTimestamp(text: str, visible: bool):
-    """Displays the time elapsed since the project was last modified."""
     return ft.Text(
         text,
         style=Styles.CARD_TIMESTAMP_STYLE,
@@ -110,7 +107,6 @@ def UpdatedTimestamp(text: str, visible: bool):
 
 @ft.component
 def MoreOptionsButton(on_click: Callable[[ft.ControlEvent], None]):
-    """Icon button for accessing contextual actions for the project."""
     return ft.IconButton(
         icon=ft.Icons.MORE_HORIZ,
         icon_color=ft.Colors.ON_SURFACE_VARIANT,

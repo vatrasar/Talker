@@ -92,13 +92,6 @@ def ProjectPickView() -> ft.Container:
 
 @ft.component
 def LogoSection() -> ft.Container:
-    """
-    Displays the main application logo and name.
-
-    Purpose: Branding and identification.
-    Key UI Elements: Icon, Text.
-    Used In: ProjectPickView.
-    """
     return ft.Container(
         content=ft.Row(
             controls=[
@@ -118,14 +111,6 @@ def LogoSection() -> ft.Container:
 
 @ft.component
 def WelcomeHeaderWithNewProject(is_xs: bool, on_new_project: Callable[[ft.ControlEvent], Any]) -> ft.ResponsiveRow:
-    """
-    Displays the welcome message and the 'Open New Project' action.
-
-    Purpose: Greets the user and provides a primary action for new projects.
-    Usage: WelcomeHeaderWithNewProject(is_xs=True, on_new_project=handle_click)
-    Key UI Elements: Welcome title, subtitle, OutlinedButton.
-    Used In: ProjectPickView.
-    """
     welcome_text = ft.Column(
         controls=[
             ft.Text(
@@ -169,13 +154,6 @@ def WelcomeHeaderWithNewProject(is_xs: bool, on_new_project: Callable[[ft.Contro
 
 @ft.component
 def RecentProjectsList(is_xs: bool, projects: list[Project]) -> ft.Column:
-    """
-    Displays a column of recent project cards.
-
-    Usage: Renders a list of projects from the state.
-    Key UI Elements: RecentProjectCard instances.
-    Used In: ProjectPickView.
-    """
     if not projects:
         return ft.Column(
             controls=[

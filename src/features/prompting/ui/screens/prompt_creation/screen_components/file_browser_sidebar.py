@@ -53,11 +53,6 @@ def FileBrowserSidebar(vm: PromptCreationViewModel) -> ft.Container:
 
 @ft.component
 def FileBrowserItem(item: FileSystemItem, vm: PromptCreationViewModel, children: list = None) -> ft.Column | ft.Container:
-    """
-    Represents an item (file or folder) in the file browser.
-    
-    Purpose: Handles display and expansion logic for files and folders with animated transitions.
-    """
     state, _ = ft.use_state(vm.state)
     is_expanded = item.path in state.expanded_folders
     is_hovered, set_is_hovered = ft.use_state(False)
