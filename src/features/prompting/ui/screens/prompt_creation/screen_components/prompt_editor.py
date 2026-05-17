@@ -1,5 +1,6 @@
 import flet as ft
 from features.prompting.ui.screens.prompt_creation.prompt_creation_view_model import PromptCreationViewModel
+from features.prompting.ui.screens.prompt_creation.screen_components.prompting_text_field import PromptingTextField
 
 
 @ft.component
@@ -9,7 +10,7 @@ def PromptEditor(vm: PromptCreationViewModel) -> ft.Container:
 
     Purpose: Provides text areas for source context and generated output, plus action buttons.
     Usage: Injected with PromptCreationViewModel to access project state.
-    Key UI Elements: Info bar, main editing area (EditorMainArea), footer.
+    Key UI Elements: Info bar, main editing area (EditorMainArea containing PromptingTextField), footer.
     Used In: PromptCreationView.
     """
     state, _ = ft.use_state(vm.state)
@@ -55,20 +56,13 @@ def EditorMainArea(min_lines: int) -> ft.Column:
 
 @ft.component
 def PromptEditionSection(min_lines: int) -> ft.Column:
-    text_field = ft.TextField(
+    custom_field = PromptingTextField(
         label="Source Context / Whisper Output",
-        multiline=True,
-        expand=False,
         min_lines=min_lines,
-        border=ft.InputBorder.OUTLINE,
-        border_color=ft.Colors.OUTLINE_VARIANT,
-        focused_border_color=ft.Colors.PRIMARY,
-        text_size=14,
-        dense=True,
     )
 
     return ft.Column(
-        controls=[text_field],
+        controls=[custom_field],
         alignment=ft.MainAxisAlignment.CENTER,
         horizontal_alignment=ft.CrossAxisAlignment.STRETCH,
         expand=2,
