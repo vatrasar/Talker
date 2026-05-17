@@ -1,5 +1,6 @@
 import flet as ft
 from features.prompting.domain.enums.file_system_item_type import FileSystemItemType
+from features.prompting.domain.models.item_in_sorted_list import ItemInSortedList
 
 @ft.component
 def PromptingTextField(
@@ -62,44 +63,8 @@ def PromptingTextField(
 
     prompt_controls = []
     for item in state.items:
-        if isinstance(item.value, str):
-            prompt_controls.append(
-                ft.Text(
-                    key=f"prompt_word_{item.index}",
-                    value=item.value,
-                    size=14,
-                    color=ft.Colors.ON_SURFACE,
-                )
-            )
-        else:
-            item_val = item.value
-            icon_name = (
-                ft.Icons.FOLDER_ROUNDED
-                if item_val.type == FileSystemItemType.FOLDER
-                else ft.Icons.INSERT_DRIVE_FILE_ROUNDED
-            )
-            prompt_controls.append(
-                ft.Container(
-                    key=f"prompt_file_{item_val.path}",
-                    content=ft.Row(
-                        controls=[
-                            ft.Icon(icon_name, size=16, color=ft.Colors.ON_SECONDARY_CONTAINER),
-                            ft.Text(
-                                value=item_val.name,
-                                size=12,
-                                weight=ft.FontWeight.W_500,
-                                color=ft.Colors.ON_SECONDARY_CONTAINER,
-                            ),
-                        ],
-                        tight=True,
-                        spacing=4,
-                    ),
-                    bgcolor=ft.Colors.SECONDARY_CONTAINER,
-                    padding=ft.Padding(12, 6, 12, 6),
-                    border_radius=ft.BorderRadius.all(16),
-                    border=ft.Border.all(width=1, color=ft.Colors.OUTLINE_VARIANT),
-                )
-            )
+        control = _create_prompt_control(item)
+        prompt_controls.append(control)
 
     textfield = ft.TextField(
         key="prompt_editing_textfield",
@@ -181,4 +146,41 @@ def PromptingTextField(
         height=height,
         clip_behavior=ft.ClipBehavior.NONE,
         on_click=handle_label_click,
+    )
+
+
+def _create_prompt_control(item: ItemInSortedList) -> ft.Control:
+    if isinstance(item.value, str):
+        return ft.Text(
+            key=f"prompt_word_{item.index}",
+            value=item.value,
+            size=14,
+            color=ft.Colors.ON_SURFACE,
+        )
+
+    item_val = item.value
+    icon_name = (
+        ft.Icons.FOLDER_ROUNDED
+        if item_val.type == FileSystemItemType.FOLDER
+        else ft.Icons.INSERT_DRIVE_FILE_ROUNDED
+    )
+    return ft.Container(
+        key=f"prompt_file_{item_val.path}",
+        content=ft.Row(
+            controls=[
+                ft.Icon(icon_name, size=16, color=ft.Colors.ON_SECONDARY_CONTAINER),
+                ft.Text(
+                    value=item_val.name,
+                    size=12,
+                    weight=ft.FontWeight.W_500,
+                    color=ft.Colors.ON_SECONDARY_CONTAINER,
+                ),
+            ],
+            tight=True,
+            spacing=4,
+        ),
+        bgcolor=ft.Colors.SECONDARY_CONTAINER,
+        padding=ft.Padding(12, 6, 12, 6),
+        border_radius=ft.BorderRadius.all(16),
+        border=ft.Border.all(width=1, color=ft.Colors.OUTLINE_VARIANT),
     )
