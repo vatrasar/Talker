@@ -1,6 +1,6 @@
 import flet as ft
 from features.prompting.ui.screens.prompt_creation.prompt_creation_view_model import PromptCreationViewModel
-from features.prompting.ui.screens.prompt_creation.screen_components.prompting_text_field import PromptingTextField
+from features.prompting.ui.screens.prompt_creation.screen_components.prompting_text_field.prompting_text_field_view import PromptingTextField
 
 
 @ft.component

@@ -1,10 +1,12 @@
 from features.landing.ui.screens.project_pick.project_pick_view_model import ProjectPickViewModel
 from features.prompting.ui.screens.prompt_creation.prompt_creation_view_model import PromptCreationViewModel
+from features.prompting.ui.screens.prompt_creation.screen_components.prompting_text_field.prompting_text_field_view_model import PromptingTextFieldViewModel
 from core.repository_contracts.i_recent_project_repository import IRecentProjectRepository
 from infrastructure.database.db_core import DBCore
 from infrastructure.repositories.recent_project_repository import RecentProjectRepository
 from features.landing.domain.use_cases.add_recent_project_use_case import AddRecentProjectUseCase
 from features.prompting.domain.services.project_structure_service import ProjectStructureService
+from features.prompting.domain.services.prompting_creation_service import PromptingCreationService
 
 class AppDIContainer:
     """
@@ -22,6 +24,7 @@ class AppDIContainer:
         self._recent_project_repository = RecentProjectRepository(self._db_core)
         self._add_recent_project_use_case = AddRecentProjectUseCase(self._recent_project_repository)
         self._project_structure_service = ProjectStructureService()
+        self._prompting_creation_service = PromptingCreationService()
 
     async def initialize(self) -> None:
         """
@@ -36,6 +39,10 @@ class AppDIContainer:
     @property
     def recent_project_repository(self) -> IRecentProjectRepository:
         return self._recent_project_repository
+
+    @property
+    def prompting_creation_service(self) -> PromptingCreationService:
+        return self._prompting_creation_service
 
     def build_project_pick_view_model(self) -> ProjectPickViewModel:
         """
@@ -59,3 +66,16 @@ class AppDIContainer:
         return PromptCreationViewModel(
             project_structure_service=self._project_structure_service
         )
+
+    def build_prompting_text_field_view_model(self) -> PromptingTextFieldViewModel:
+        """
+        Builds and returns a new instance of PromptingTextFieldViewModel.
+
+        Returns:
+            PromptingTextFieldViewModel: The instantiated ViewModel.
+        """
+        return PromptingTextFieldViewModel(
+            prompting_creation_service=self._prompting_creation_service
+        )
+
+

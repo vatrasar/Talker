@@ -5,7 +5,8 @@ from core.models.recent_project import RecentProject
 
 
 @pytest.mark.asyncio
-async def test_execute_calls_repository_with_correct_data_and_returns_result():
+@patch("features.landing.domain.use_cases.add_recent_project_use_case.os.path.isdir", return_value=True)
+async def test_execute_calls_repository_with_correct_data_and_returns_result(mock_isdir):
     """
     Verifies that the use case calls the repository with correct data and returns the result.
     """
@@ -24,11 +25,13 @@ async def test_execute_calls_repository_with_correct_data_and_returns_result():
     
     # Assert
     mock_repo.add_project.assert_called_once_with("Test", "/path")
-    assert result == expected_project
+    assert result.is_success
+    assert result.value == expected_project
 
 
 @pytest.mark.asyncio
-async def test_execute_removes_oldest_project_when_limit_exceeded():
+@patch("features.landing.domain.use_cases.add_recent_project_use_case.os.path.isdir", return_value=True)
+async def test_execute_removes_oldest_project_when_limit_exceeded(mock_isdir):
     """
     Verifies that the oldest projects are deleted when the project count exceeds the limit.
     """
@@ -51,7 +54,8 @@ async def test_execute_removes_oldest_project_when_limit_exceeded():
 
 
 @pytest.mark.asyncio
-async def test_execute_does_not_remove_project_when_under_limit():
+@patch("features.landing.domain.use_cases.add_recent_project_use_case.os.path.isdir", return_value=True)
+async def test_execute_does_not_remove_project_when_under_limit(mock_isdir):
     """
     Verifies that no project is deleted when the project count is within the limit.
     """
@@ -73,7 +77,8 @@ async def test_execute_does_not_remove_project_when_under_limit():
 
 
 @pytest.mark.asyncio
-async def test_execute_removes_multiple_projects_when_limit_exceeded_by_more_than_one():
+@patch("features.landing.domain.use_cases.add_recent_project_use_case.os.path.isdir", return_value=True)
+async def test_execute_removes_multiple_projects_when_limit_exceeded_by_more_than_one(mock_isdir):
     """
     Verifies that the use case deletes multiple oldest projects if the count is much higher than the limit.
     """
