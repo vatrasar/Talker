@@ -30,22 +30,24 @@ def PromptingTextField(
 
     ft.use_effect(sync_props, [label])
 
-    def handle_focus(e: ft.ControlEvent) -> None:
+    async def handle_focus(e: ft.ControlEvent) -> None:
         set_is_focused(True)
+        await vm.handle_focus()
 
-    def handle_blur(e: ft.ControlEvent) -> None:
+    async def handle_blur(e: ft.ControlEvent) -> None:
         set_is_focused(False)
-        vm.add_text_to_prompt()
+        await vm.finish_editing()
 
-    def handle_change(e: ft.ControlEvent) -> None:
+    async def handle_change(e: ft.ControlEvent) -> None:
         vm.update_text(e.control.value)
 
-    def handle_hover(e: ft.HoverEvent) -> None:
+    async def handle_hover(e: ft.HoverEvent) -> None:
         set_is_hovered(e.data)
 
     async def handle_label_click(e: ft.ControlEvent) -> None:
         if textfield_ref.current:
             await textfield_ref.current.focus()
+            
 
     is_active = is_focused or bool(state.value) or bool(state.items)
 
@@ -63,6 +65,7 @@ def PromptingTextField(
         if isinstance(item.value, str):
             prompt_controls.append(
                 ft.Text(
+                    key=f"prompt_word_{item.index}",
                     value=item.value,
                     size=14,
                     color=ft.Colors.ON_SURFACE,
@@ -77,6 +80,7 @@ def PromptingTextField(
             )
             prompt_controls.append(
                 ft.Container(
+                    key=f"prompt_file_{item_val.path}",
                     content=ft.Row(
                         controls=[
                             ft.Icon(icon_name, size=16, color=ft.Colors.ON_SECONDARY_CONTAINER),
@@ -98,6 +102,7 @@ def PromptingTextField(
             )
 
     textfield = ft.TextField(
+        key="prompt_editing_textfield",
         ref=textfield_ref,
         value=state.value,
         multiline=True,
@@ -110,6 +115,7 @@ def PromptingTextField(
         on_change=handle_change,
         bgcolor=ft.Colors.TRANSPARENT,
         filled=False,
+        autofocus=is_focused,
     )
 
     inner_content = ft.Container(

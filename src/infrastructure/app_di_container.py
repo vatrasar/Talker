@@ -7,6 +7,8 @@ from infrastructure.repositories.recent_project_repository import RecentProjectR
 from features.landing.domain.use_cases.add_recent_project_use_case import AddRecentProjectUseCase
 from features.prompting.domain.services.project_structure_service import ProjectStructureService
 from features.prompting.domain.services.prompting_creation_service import PromptingCreationService
+from features.prompting.domain.use_cases.merge_prompt_text_use_case import MergePromptTextUseCase
+
 
 class AppDIContainer:
     """
@@ -25,6 +27,8 @@ class AppDIContainer:
         self._add_recent_project_use_case = AddRecentProjectUseCase(self._recent_project_repository)
         self._project_structure_service = ProjectStructureService()
         self._prompting_creation_service = PromptingCreationService()
+        self._merge_prompt_text_use_case = MergePromptTextUseCase()
+
 
     async def initialize(self) -> None:
         """
@@ -75,7 +79,8 @@ class AppDIContainer:
             PromptingTextFieldViewModel: The instantiated ViewModel.
         """
         return PromptingTextFieldViewModel(
-            prompting_creation_service=self._prompting_creation_service
+            prompting_creation_service=self._prompting_creation_service,
+            merge_prompt_text_use_case=self._merge_prompt_text_use_case,
         )
 
 

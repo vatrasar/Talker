@@ -46,3 +46,24 @@ class PromptingCreationService:
         Returns a deep copy of the sorted items making up the prompt.
         """
         return copy.deepcopy(self._items)
+
+    def replace_merged_text(self, text: str, merged_indices: list[int]) -> None:
+        """
+        Removes the merged words at specified indices and adds the new text split into words.
+
+        Invoked By: PromptingTextFieldViewModel.
+        """
+        self._items = [item for idx, item in enumerate(self._items) if idx not in merged_indices]
+
+        if text and text.strip():
+            words = text.split()
+            for word in words:
+                next_index = len(self._items)
+                item = ItemInSortedList(index=next_index, value=word)
+                self._items.append(item)
+
+        for idx, item in enumerate(self._items):
+            item.index = idx
+
+        self._current_text = ""
+

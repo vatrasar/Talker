@@ -2,8 +2,10 @@ import flet as ft
 from unittest.mock import patch, MagicMock, PropertyMock
 from features.prompting.domain.enums.file_system_item_type import FileSystemItemType
 from features.prompting.domain.models.file_system_item_for_prompt import FileSystemItemForPrompt
+import pytest
 from features.prompting.domain.models.item_in_sorted_list import ItemInSortedList
 from features.prompting.domain.services.prompting_creation_service import PromptingCreationService
+from features.prompting.domain.use_cases.merge_prompt_text_use_case import MergePromptTextUseCase
 from features.prompting.ui.screens.prompt_creation.screen_components.prompting_text_field.prompting_text_field_view import PromptingTextField
 from features.prompting.ui.screens.prompt_creation.screen_components.prompting_text_field.prompting_text_field_view_model import PromptingTextFieldViewModel
 
@@ -53,7 +55,11 @@ def test_prompting_text_field_view_model() -> None:
     and updates reactive state properties.
     """
     service = PromptingCreationService()
-    vm = PromptingTextFieldViewModel(prompting_creation_service=service)
+    use_case = MergePromptTextUseCase()
+    vm = PromptingTextFieldViewModel(
+        prompting_creation_service=service,
+        merge_prompt_text_use_case=use_case,
+    )
     
     # 1. Test update_props
     vm.update_props("Prompt Label")
@@ -92,7 +98,11 @@ def test_prompting_text_field_rendering(mock_use_memo: MagicMock, mock_use_effec
     file_item = FileSystemItemForPrompt(name="main.py", path="/workspace/main.py", type=FileSystemItemType.FILE)
     service._items.append(ItemInSortedList(index=1, value=file_item))
     
-    vm = PromptingTextFieldViewModel(prompting_creation_service=service)
+    use_case = MergePromptTextUseCase()
+    vm = PromptingTextFieldViewModel(
+        prompting_creation_service=service,
+        merge_prompt_text_use_case=use_case,
+    )
     vm.update_props("Label")
     
     mock_di.build_prompting_text_field_view_model.return_value = vm
@@ -135,3 +145,105 @@ def test_prompting_text_field_rendering(mock_use_memo: MagicMock, mock_use_effec
     
     # Third: TextField input
     assert isinstance(row.controls[2], ft.TextField)
+
+
+@pytest.mark.asyncio
+async def test_merge_prompt_text_use_case() -> None:
+    """
+    Verifies that MergePromptTextUseCase merges words backwards until it hits a file system item.
+    """
+    use_case = MergePromptTextUseCase()
+    
+    file_item = FileSystemItemForPrompt(name="main.py", path="/workspace/main.py", type=FileSystemItemType.FILE)
+    items = [
+        ItemInSortedList(index=0, value="word1"),
+        ItemInSortedList(index=1, value="word2"),
+        ItemInSortedList(index=2, value=file_item),
+        ItemInSortedList(index=3, value="word3"),
+        ItemInSortedList(index=4, value="word4"),
+    ]
+    
+    text, indices = await use_case.execute(items)
+    assert text == "word3 word4"
+    assert indices == [3, 4]
+
+    text2, indices2 = await use_case.execute([ItemInSortedList(index=0, value=file_item)])
+    assert text2 == ""
+    assert indices2 == []
+
+    items3 = [
+        ItemInSortedList(index=0, value="word1"),
+        ItemInSortedList(index=1, value="word2"),
+    ]
+    text3, indices3 = await use_case.execute(items3)
+    assert text3 == "word1 word2"
+    assert indices3 == [0, 1]
+
+
+def test_replace_merged_text_in_service() -> None:
+    """
+    Verifies that replace_merged_text successfully filters out merged items,
+    splits and appends the new text, and correctly recalculates consecutive indices.
+    """
+    service = PromptingCreationService()
+    service.addNewText("word1 word2")
+    file_item = FileSystemItemForPrompt(name="main.py", path="/workspace/main.py", type=FileSystemItemType.FILE)
+    service._items.append(ItemInSortedList(index=2, value=file_item))
+    service.addNewText("word3 word4")
+
+    items_before = service.get_items()
+    assert len(items_before) == 5
+    assert items_before[0].value == "word1"
+    assert items_before[1].value == "word2"
+    assert items_before[2].value == file_item
+    assert items_before[3].value == "word3"
+    assert items_before[4].value == "word4"
+
+    service.replace_merged_text("edited word5", [3, 4])
+
+    items_after = service.get_items()
+    assert len(items_after) == 5
+    assert items_after[0].value == "word1"
+    assert items_after[0].index == 0
+    assert items_after[1].value == "word2"
+    assert items_after[1].index == 1
+    assert items_after[2].value == file_item
+    assert items_after[2].index == 2
+    assert items_after[3].value == "edited"
+    assert items_after[3].index == 3
+    assert items_after[4].value == "word5"
+    assert items_after[4].index == 4
+
+
+@pytest.mark.asyncio
+async def test_view_model_focus_blur_editing_flow() -> None:
+    """
+    Verifies that the ViewModel handles the focus/blur merging and commit flow correctly.
+    """
+    service = PromptingCreationService()
+    service.addNewText("hello world")
+    
+    use_case = MergePromptTextUseCase()
+    vm = PromptingTextFieldViewModel(
+        prompting_creation_service=service,
+        merge_prompt_text_use_case=use_case,
+    )
+    vm.update_props("Label")
+    
+    assert len(vm.state.items) == 2
+    assert vm.state.value == ""
+    
+    await vm.handle_focus()
+    assert vm.state.value == "hello world"
+    assert len(vm.state.items) == 0
+    
+    vm.update_text("hello edited universe")
+    assert vm.state.value == "hello edited universe"
+    
+    await vm.finish_editing()
+    assert vm.state.value == ""
+    assert len(vm.state.items) == 3
+    assert vm.state.items[0].value == "hello"
+    assert vm.state.items[1].value == "edited"
+    assert vm.state.items[2].value == "universe"
+
